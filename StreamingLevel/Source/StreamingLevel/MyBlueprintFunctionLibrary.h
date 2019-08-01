@@ -15,5 +15,8 @@ class STREAMINGLEVEL_API UMyBlueprintFunctionLibrary : public UBlueprintFunction
 	GENERATED_BODY()
 	
 	UFUNCTION(BlueprintCallable, Category = "Geometry")
-		static UObject* LoadActorFromPak(FString file, FString MountPoint=TEXT(""));
+		static bool LoadPakFile(TArray<FString>& AssetsList, FString file, FString MountPoint = TEXT(""));
+
+	UFUNCTION(BlueprintCallable, Category = "Geometry")
+		static UObject* LoadObject(FString AssetName, FString Name = TEXT(""));
 };

@@ -8,10 +8,11 @@
 #include "Misc/Paths.h"
 #include "IPlatformFilePak.h"
 
-UObject* UMyBlueprintFunctionLibrary::LoadActorFromPak(FString FileName, FString MountPoint) {
-	// Use FPaths::GameContentDir() as mount point
-	if(MountPoint.IsEmpty())
-		MountPoint = FPaths::ProjectDir();	//GameContentDir()
+bool UMyBlueprintFunctionLibrary::LoadPakFile(TArray<FString>& AssetsList, FString FileName, FString MountPoint) {
+	// Use FPaths::ProjectContentDir() as root
+	MountPoint = FPaths::ProjectContentDir() + MountPoint;
+	if (!MountPoint.EndsWith(TEXT("/")))
+		MountPoint += TEXT("/");
 
 	// mount as same as the input directory, OR not as well
 	FileName = MountPoint + FileName;
@@ -26,53 +27,41 @@ UObject* UMyBlueprintFunctionLibrary::LoadActorFromPak(FString FileName, FString
 
 	//获取Pak文件
 	FPakFile PakFile(&PlatformFile, *FileName, false);
-	UE_LOG(LogTemp, Warning, TEXT("get PakFile..."));
+
 	//设置pak文件的Mount点. 
 	PakFile.SetMountPoint(*MountPoint);
 
 	//对pak文件mount到前面设定的MountPoint
 	UObject* LoadObject = nullptr;
-	if (PakPlatformFile->Mount(*FileName, 0, *MountPoint))
-	{
-		TArray<FString> FileList;
-
+	if (PakPlatformFile->Mount(*FileName, 0, *MountPoint)) {
 		//得到Pak文件中MountPoint路径下的所有文件
-		PakFile.FindFilesAtPath(FileList, *PakFile.GetMountPoint(), true, false, true);
-		UE_LOG(LogTemp, Warning, TEXT("Mount Success, find %d assets"), FileList.Num());
-		if (FileList.Num()>0) {
-			//对文件的路径进行处理,转换成StaticLoadObject的那种路径格式
-			FString LeftStr, RightStr;
-			FString AssetName = FileList[0];					// full path
-			AssetName = FPackageName::GetShortName(AssetName);	// [ xxx.uasset ]
-			AssetName.Split(TEXT("."), &LeftStr, &RightStr);
-			AssetName = TEXT("/Game/") + LeftStr;				// package name [ xxx ]
-			AssetName+= TEXT(".") + LeftStr;					// asset name [ xxx.xxx ]
-			FStringAssetReference reference = AssetName;
-
-			//加载UObject
-			FStreamableManager StreamableManager;
-			LoadObject = StreamableManager.LoadSynchronous(reference);
-			if (LoadObject != nullptr)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Object Load Success... class=%s"),*LoadObject->GetClass()->GetName());
-
-				UStaticMesh* Obj = Cast<UStaticMesh>(LoadObject);
-				if(Obj != nullptr)
-				{
-					//AStaticMeshActor* actor = GetWorld()->SpawnActor<AStaticMeshActor>(FVector::ZeroVector, FRotator::ZeroRotator);
-					//actor->GetStaticMeshComponent()->Mobility = EComponentMobility::Movable;
-					//actor->GetStaticMeshComponent()->SetStaticMesh(Obj);
-				}else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Object cast failed..."));
-				}
-			}else
-			{
-				UE_LOG(LogTemp, Error, TEXT("Can not Load asset..."));
-			}
+		PakFile.FindFilesAtPath(AssetsList, *PakFile.GetMountPoint(), true, false, true);
+		UE_LOG(LogTemp, Warning, TEXT("Mount %d assets in pak %s"), AssetsList.Num(), *FileName);
+		for (auto& AssetName : AssetsList) {
+			//remove extra path
+			AssetName = AssetName.Replace(*FPaths::ProjectContentDir(), TEXT(""));
 		}
-	}else{
-		UE_LOG(LogTemp, Error, TEXT("Mount Failed"));
+		return true;
 	}
-	return LoadObject;
+	return false;
+}
+
+UObject* UMyBlueprintFunctionLibrary::LoadObject(FString AssetName, FString Name) {
+	//对文件的路径进行处理,转换成StaticLoadObject的那种路径格式
+	UE_LOG(LogTemp, Warning, TEXT("Load %s"), *AssetName);
+	FString LeftStr, RightStr;
+	AssetName.Split(TEXT("."), &LeftStr, &RightStr);		// [ path/xxx.uasset ]
+	if (RightStr.Equals(TEXT("uasset"))) {
+		AssetName = TEXT("/Game/") + LeftStr;				// package name [ xxx ]
+		AssetName += TEXT(".") + (Name.IsEmpty() ? FPackageName::GetShortName(LeftStr) : Name);	// asset name [ xxx.xxx ]
+		FStringAssetReference reference = AssetName;
+		UE_LOG(LogTemp, Warning, TEXT("Load object %s"), *AssetName);
+
+		//加载UObject
+		FStreamableManager StreamableManager;
+		return StreamableManager.LoadSynchronous(reference);
+	}
+	else
+		UE_LOG(LogTemp, Warning, TEXT("Ignore asset %s"), *AssetName);
+	return nullptr;
 }
