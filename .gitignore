@@ -2,3 +2,6 @@
 *.uproject
 *.suo
 *.sln
+
+StreamingLevel/.vs
+UnrealPlus/.vs
