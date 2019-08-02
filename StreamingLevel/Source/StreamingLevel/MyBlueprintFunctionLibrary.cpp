@@ -8,7 +8,9 @@
 #include "Misc/Paths.h"
 #include "IPlatformFilePak.h"
 
-bool UMyBlueprintFunctionLibrary::LoadPakFile(TArray<FString>& AssetsList, FString FileName, FString MountPoint) {
+void UMyBlueprintFunctionLibrary::LoadPakFile(TArray<FString>& AssetsList, FString FileName, FString MountPoint) {
+	if (GIsEditor)return;
+
 	// Use FPaths::ProjectContentDir() as root
 	MountPoint = FPaths::ProjectContentDir() + MountPoint;
 	if (!MountPoint.EndsWith(TEXT("/")))
@@ -16,39 +18,34 @@ bool UMyBlueprintFunctionLibrary::LoadPakFile(TArray<FString>& AssetsList, FStri
 
 	// mount as same as the input directory, OR not as well
 	FileName = MountPoint + FileName;
-	UE_LOG(LogTemp, Warning, TEXT("MountPoint=%s, FileName=%s"), *MountPoint, *FileName);
+	//UE_LOG(LogTemp, Warning, TEXT("MountPoint=%s, FileName=%s"), *MountPoint, *FileName);
 
-	//获取当前使用的平台,这里使用的是WIN64平台
+	// request platform file and initialize pak file
 	IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
-	//初始化PakPlatformFile
-	FPakPlatformFile* PakPlatformFile = new FPakPlatformFile();
-	PakPlatformFile->Initialize(&PlatformFile, TEXT(""));
-	FPlatformFileManager::Get().SetPlatformFile(*PakPlatformFile);
+	FPakPlatformFile PakPlatformFile;
+	PakPlatformFile.Initialize(&PlatformFile, TEXT(""));
+	FPlatformFileManager::Get().SetPlatformFile(PakPlatformFile);
 
-	//获取Pak文件
+	// set MountPoint for pak file
 	FPakFile PakFile(&PlatformFile, *FileName, false);
-
-	//设置pak文件的Mount点. 
 	PakFile.SetMountPoint(*MountPoint);
 
-	//对pak文件mount到前面设定的MountPoint
+	// mount pak file and find all assets
 	UObject* LoadObject = nullptr;
-	if (PakPlatformFile->Mount(*FileName, 0, *MountPoint)) {
-		//得到Pak文件中MountPoint路径下的所有文件
+	if (PakPlatformFile.Mount(*FileName, 0, *MountPoint)) {
 		PakFile.FindFilesAtPath(AssetsList, *PakFile.GetMountPoint(), true, false, true);
-		UE_LOG(LogTemp, Warning, TEXT("Mount %d assets in pak %s"), AssetsList.Num(), *FileName);
 		for (auto& AssetName : AssetsList) {
 			//remove extra path
 			AssetName = AssetName.Replace(*FPaths::ProjectContentDir(), TEXT(""));
 		}
-		return true;
-	}
-	return false;
+		//if (GIsEditor)	PakPlatformFile.Unmount(*FileName);
+	}else
+		UE_LOG(LogTemp, Error, TEXT("Mount %s failed at %s"), *FileName, *MountPoint);
 }
 
-UObject* UMyBlueprintFunctionLibrary::LoadObject(FString AssetName, FString Name) {
-	//对文件的路径进行处理,转换成StaticLoadObject的那种路径格式
-	UE_LOG(LogTemp, Warning, TEXT("Load %s"), *AssetName);
+UObject* UMyBlueprintFunctionLibrary::SyncLoadAsset(FString AssetName, FString Name) {
+	// translate path as format as for StaticLoadObject
+	//UE_LOG(LogTemp, Warning, TEXT("Load %s"), *AssetName);
 	FString LeftStr, RightStr;
 	AssetName.Split(TEXT("."), &LeftStr, &RightStr);		// [ path/xxx.uasset ]
 	if (RightStr.Equals(TEXT("uasset"))) {
@@ -57,11 +54,10 @@ UObject* UMyBlueprintFunctionLibrary::LoadObject(FString AssetName, FString Name
 		FStringAssetReference reference = AssetName;
 		UE_LOG(LogTemp, Warning, TEXT("Load object %s"), *AssetName);
 
-		//加载UObject
+		// load UObject
 		FStreamableManager StreamableManager;
 		return StreamableManager.LoadSynchronous(reference);
-	}
-	else
+	}else
 		UE_LOG(LogTemp, Warning, TEXT("Ignore asset %s"), *AssetName);
 	return nullptr;
 }
