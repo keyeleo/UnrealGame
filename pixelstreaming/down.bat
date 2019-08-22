@@ -1,6 +1,7 @@
+@echo off
 set Game=Noon.exe
 
-@pushd %~dp0
+pushd %~dp0
 :: stop SignallingWebServer
 taskkill /f /im stunserver.exe
 
@@ -16,4 +17,4 @@ taskkill /f /im WebRTCProxy.exe
 :: start Game with PixelStreaming
 taskkill /f /im %Game%
 
-@popd
+popd

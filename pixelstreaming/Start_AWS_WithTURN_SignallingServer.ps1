@@ -6,18 +6,17 @@ param(
 [int]$webRTCPort=$(throw "Parameter missing: -webRTCPort WebRTCPort"),
 [int]$stunPort=$(throw "Parameter missing: -stunPort StunPort"),
 [int]$turnPort=$(throw "Parameter missing: -turnPort TurnPort"),
+[int]$heartbeat=$(throw "Parameter missing: -heartbeat Heartbeat"),
 [string]$cirrus=$(throw "Parameter missing: -cirrus CirrusPath")
 )
 
 
 # $publicIp = Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/public-ipv4"
 
-Write-Output "Public IP: $publicIp, port: $port, webRTCPort: $webRTCPort, stunPort: $stunPort, turnPort: $turnPort"
-
 $peerConnectionOptions = "{ \""iceServers\"": [{\""urls\"": [\""stun:" + $publicIp + ":" + $stunPort + "\"",\""turn:" + $publicIp + ":" + $turnPort + "\""], \""username\"": \""PixelStreamingUser\"", \""credential\"": \""Another TURN in the road\""}] }"
 
 $ProcessExe = "node.exe"
-$Arguments = @("$cirrus", "--peerConnectionOptions=""$peerConnectionOptions""", "--publicIp=$publicIp", "--httpPort=$port", "--proxyPort=$webRTCPort")
+$Arguments = @("$cirrus", "--peerConnectionOptions=""$peerConnectionOptions""", "--publicIp=$publicIp", "--httpPort=$port", "--proxyPort=$webRTCPort", "--heartbeat=$heartbeat")
 # Add arguments passed to script to Arguments for executable
 # $Arguments += $args
 
