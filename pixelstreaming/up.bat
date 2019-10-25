@@ -4,11 +4,11 @@
 set Game=Noon.exe
 :: ip and ports should be exposed, signallingPort is for web client
 set publicIp=172.18.137.168
-set signallingPort=80
-set webRTCPort=8888
 set stunPort=19302
 set turnPort=19303
 :: private port
+set signallingPort=80
+set webRTCPort=8888
 set gamePort=8124
 :: framerate and bitrate
 set frameRate=-1
@@ -29,17 +29,11 @@ timeout /T 1
 @echo on
 
 if %NAT%==true (
-	:: run STUNServer
-	start "STUNServer" stunserver.exe 0.0.0.0:%stunPort%
-
-	:: run TURNServer
-	start "TURNServer" Powershell.exe -executionpolicy unrestricted -File Start_AWS_TURNServer.ps1 -Port %turnPort%
-
 	:: run SignallingWebServer
-	start "%Game%SignallingWebServer" node %cirrus% --publicIp %publicIp% --httpPort %signallingPort% --proxyPort %webRTCPort% --heartbeat %cirrusHeartbeat% --HomepageFile=custom_html/PixelDemo.htm --stunPort %stunPort% --turnPort %turnPort%
+	@start "%Game%SignallingWebServer" node %cirrus% --publicIp %publicIp% --httpPort %signallingPort% --proxyPort %webRTCPort% --heartbeat %cirrusHeartbeat% --HomepageFile=custom_html/PixelDemo.htm --stunPort %stunPort% --turnPort %turnPort%
 ) else (
 	:: run SignallingWebServer
-	start "%Game%SignallingWebServer" node %cirrus% --publicIp %publicIp% --httpPort %signallingPort% --proxyPort %webRTCPort% --heartbeat %cirrusHeartbeat% --HomepageFile=custom_html/PixelDemo.htm
+	@start "%Game%SignallingWebServer" node %cirrus% --publicIp %publicIp% --httpPort %signallingPort% --proxyPort %webRTCPort% --heartbeat %cirrusHeartbeat% --HomepageFile=custom_html/PixelDemo.htm
 )
 
 :: run WebRTCProxy

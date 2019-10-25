@@ -129,6 +129,7 @@ function onParagonLoad() {
 	// When the data channel is connected we want to ask UE4 if 4K is supported.
 	onDataChannelConnected = function() { emitUIInteraction("4K"); };
 	addResponseEventListener("handle_responses", myHandleResponseFunction);
+	document.oncontextmenu = function(){return false;};
 }
 
 function onFullscreenChange(data)

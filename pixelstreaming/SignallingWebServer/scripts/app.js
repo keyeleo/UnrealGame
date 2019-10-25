@@ -192,6 +192,15 @@ function setOverlay(htmlClass, htmlElement, onClickFunction){
 	videoPlayOverlay.classList.add(htmlClass);
 }
 
+function play(){
+	if(webRtcPlayerObj)
+		webRtcPlayerObj.video.play();
+
+	requestQualityControl();
+
+	hideOverlay();
+}
+
 function showConnectOverlay(){
 	var startText = document.createElement('div');
 	startText.id = 'playButton';
@@ -215,12 +224,7 @@ function showPlayOverlay(){
 	img.src = '/images/Play.png';
 	img.alt = 'Start Streaming';
 	setOverlay('clickableState', img, event => {
-		if(webRtcPlayerObj)
-			webRtcPlayerObj.video.play();
-
-		requestQualityControl();
-
-		hideOverlay();
+		play();
 	});
 }
 
@@ -271,7 +275,10 @@ function setupWebRtcPlayer(htmlElement, clientConfig){
     };
 
     webRtcPlayerObj.onVideoInitialised = function(){
-    	showPlayOverlay();
+		if(is_reconnection)
+			play();
+		else
+    		showPlayOverlay();
     	resizePlayerStyle();
     }
 
@@ -1147,7 +1154,9 @@ function start() {
 		statsDiv.innerHTML = 'Not connected';
 	}
 				
-	if (!connect_on_load || is_reconnection){
+	if(is_reconnection){
+		connect();
+	}else if (!connect_on_load){
 		showConnectOverlay();
 		resizePlayerStyle();
 	} else {
@@ -1182,7 +1191,7 @@ function connect() {
 	});
 
 	socket.on('disconnect', (reason) => {
-		console.log(`Connection is closed: ${reason}`);
+		socket.on('disconnect', (reason) => {});
 		socket.close();
 		socket = undefined;
 		is_reconnection = true;
@@ -1219,7 +1228,6 @@ function onClientConfig(clientConfig) {
 
 	let playerDiv = document.getElementById('player');
 	let playerElement = setupWebRtcPlayer(playerDiv, clientConfig)
-	resizePlayerStyle();
 
 	switch (inputOptions.controlScheme) {
 		case ControlSchemeType.HoveringMouse:
