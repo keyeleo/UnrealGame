@@ -7,7 +7,8 @@ param(
 [int]$stunPort=$(throw "Parameter missing: -stunPort StunPort"),
 [int]$turnPort=$(throw "Parameter missing: -turnPort TurnPort"),
 [int]$heartbeat=$(throw "Parameter missing: -heartbeat Heartbeat"),
-[string]$cirrus=$(throw "Parameter missing: -cirrus CirrusPath")
+[string]$cirrus=$(throw "Parameter missing: -cirrus CirrusPath"),
+[string]$HomepageFile=$(throw "Parameter missing: -cirrus CirrusPath")
 )
 
 
@@ -16,7 +17,7 @@ param(
 $peerConnectionOptions = "{ \""iceServers\"": [{\""urls\"": [\""stun:" + $publicIp + ":" + $stunPort + "\"",\""turn:" + $publicIp + ":" + $turnPort + "\""], \""username\"": \""PixelStreamingUser\"", \""credential\"": \""Another TURN in the road\""}] }"
 
 $ProcessExe = "node.exe"
-$Arguments = @("$cirrus", "--peerConnectionOptions=""$peerConnectionOptions""", "--publicIp=$publicIp", "--httpPort=$port", "--proxyPort=$webRTCPort", "--heartbeat=$heartbeat")
+$Arguments = @("$cirrus", "--peerConnectionOptions=""$peerConnectionOptions""", "--publicIp=$publicIp", "--httpPort=$port", "--proxyPort=$webRTCPort", "--heartbeat=$heartbeat", "--HomepageFile=$HomepageFile")
 # Add arguments passed to script to Arguments for executable
 # $Arguments += $args
 

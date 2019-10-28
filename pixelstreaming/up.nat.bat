@@ -5,7 +5,7 @@
 set stunPort=19302
 set turnPort=19303
 
-set Path=%Path%;%UnrealEngine%\Engine\Source\Programs\PixelStreaming\WebServers\SignallingWebServer;%UnrealEngine%\Engine\Source\Programs\PixelStreaming\WebRTCProxy\bin;%UnrealEngine%\Engine\Source\ThirdParty\WebRTC\rev.23789\programs\Win64\VS2017\release
+set Path=%Path%;%cd%\Engine\Source\Programs\PixelStreaming\WebServers\SignallingWebServer;%cd%\Engine\Source\Programs\PixelStreaming\WebRTCProxy\bin;%cd%\Engine\Source\ThirdParty\WebRTC\rev.23789\programs\Win64\VS2017\release
 pushd %~dp0
 
 @echo on

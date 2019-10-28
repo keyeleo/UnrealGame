@@ -39,4 +39,4 @@ AddUser $Realm $TurnUsername $TurnPassword $AuthFile
 
 
 Write-Output "Running: $ProcessExe $Arguments"
-Start-Process -FilePath $ProcessExe -ArgumentList $Arguments
+Start-Process -FilePath $ProcessExe -ArgumentList $Arguments -NoNewWindow

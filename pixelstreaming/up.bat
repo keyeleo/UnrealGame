@@ -4,10 +4,10 @@
 set Game=Noon.exe
 :: ip and ports should be exposed, signallingPort is for web client
 set publicIp=172.18.137.168
+set signallingPort=80
 set stunPort=19302
 set turnPort=19303
 :: private port
-set signallingPort=80
 set webRTCPort=8888
 set gamePort=8124
 :: framerate and bitrate
@@ -30,20 +30,20 @@ timeout /T 1
 
 if %NAT%==true (
 	:: run SignallingWebServer
-	@start "%Game%SignallingWebServer" node %cirrus% --publicIp %publicIp% --httpPort %signallingPort% --proxyPort %webRTCPort% --heartbeat %cirrusHeartbeat% --HomepageFile=custom_html/PixelDemo.htm --stunPort %stunPort% --turnPort %turnPort%
+	@start "%Game%SignallingWebServer" Powershell.exe -executionpolicy unrestricted -File Start_AWS_WithTURN_SignallingServer.ps1 -cirrus %cirrus% -publicIp %publicIp% -port %signallingPort% -webRTCPort %webRTCPort% -stunPort %stunPort% -turnPort %turnPort% -heartbeat %cirrusHeartbeat% -HomepageFile custom_html/PixelDemo.htm
 ) else (
 	:: run SignallingWebServer
 	@start "%Game%SignallingWebServer" node %cirrus% --publicIp %publicIp% --httpPort %signallingPort% --proxyPort %webRTCPort% --heartbeat %cirrusHeartbeat% --HomepageFile=custom_html/PixelDemo.htm
 )
 
 :: run WebRTCProxy
-start "%Game%WebRTCProxy" WebRTCProxy.exe -LocalTime -Heartbeat=%proxyHeartbeat% -Cirrus=%publicIp%:%webRTCPort% -UE4Port=%gamePort%
+@start "%Game%WebRTCProxy" WebRTCProxy.exe -LocalTime -Heartbeat=%proxyHeartbeat% -Cirrus=127.0.0.1:%webRTCPort% -UE4Port=%gamePort%
 
 @popd
 @pushd %~dp0
 
 :: start Game with PixelStreaming
-start "Game" %Game%.exe -dx11 -RenderOffScreen -PixelStreamingPort=%gamePort% -NvEncFrameRateNum=%frameRate% -NvEncAverageBitRate=%averageBitRate% -Heartbeat=%ue4Heartbeat% -nosound
+@start "Game" %Game%.exe -dx11 -RenderOffScreen -PixelStreamingPort=%gamePort% -NvEncFrameRateNum=%frameRate% -NvEncAverageBitRate=%averageBitRate% -Heartbeat=%ue4Heartbeat% -nosound
 
 @popd
 cd ..
