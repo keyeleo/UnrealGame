@@ -2,7 +2,10 @@
 *.uproject
 *.suo
 *.sln
-
-StreamingLevel/.vs
-UnrealPlus/.vs
-Noon/
+*.xcworkspace
+*/.vs
+*/Intermediate
+*/Saved
+*/Build
+*/DerivedDataCache
+genesis
