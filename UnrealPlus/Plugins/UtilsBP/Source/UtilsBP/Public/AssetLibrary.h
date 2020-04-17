@@ -16,7 +16,10 @@ class UTILSBP_API UAssetLibrary : public UBlueprintFunctionLibrary
 	
     UFUNCTION(BlueprintCallable, Category = "AssetManager")
     static void LoadPakFile(TArray<FString>& AssetsList, FString file, FString MountPoint = TEXT(""));
-    
+
+	UFUNCTION(BlueprintCallable, Category = "AssetManager")
+		static UObject* SyncLoadAsset(FString AssetName, FString Name = TEXT(""));
+
     UFUNCTION(BlueprintCallable, Category = "AssetManager")
-    static UObject* SyncLoadAsset(FString AssetName, FString Name = TEXT(""));
+    static AActor* SpawnActor(AActor* parent,FString ClassName);
 };
