@@ -20,6 +20,6 @@ class UTILSBP_API UAssetLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, Category = "AssetManager")
 		static UObject* SyncLoadAsset(FString AssetName, FString Name = TEXT(""));
 
-    UFUNCTION(BlueprintCallable, Category = "AssetManager")
-    static AActor* SpawnActor(AActor* parent,FString ClassName);
+	UFUNCTION(BlueprintCallable, Category = "AssetManager")
+		static AActor* SpawnActor(AActor* parent, UClass* Class=nullptr, FString ClassName= TEXT(""));
 };

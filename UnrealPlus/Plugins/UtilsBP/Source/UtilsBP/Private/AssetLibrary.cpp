@@ -64,32 +64,28 @@ UObject* UAssetLibrary::SyncLoadAsset(FString AssetName, FString Name) {
     return nullptr;
 }
 
-AActor* UAssetLibrary::SpawnActor(AActor* parent, FString ClassName) {
-	UClass* NewClass = NULL;
-	if (FPackageName::IsShortPackageName(ClassName))
-		NewClass = FindObject<UClass>(ANY_PACKAGE, *ClassName);
-	else
-		NewClass = FindObject<UClass>(NULL, *ClassName);
+AActor* UAssetLibrary::SpawnActor(AActor* Parent, UClass* NewClass, FString ClassName) {
+	if (!NewClass)
+		NewClass = LoadClass<AActor>(nullptr, *ClassName);
 
 	if (NewClass)
 	{
 		if (NewClass->IsChildOf(AActor::StaticClass()))
 		{
-			auto World = parent ? parent->GetWorld():GWorld;
+			auto World = Parent ? Parent->GetWorld() : GWorld;
 			auto actor = World->SpawnActor<AActor>(NewClass, FVector(0, 0, 0), FRotator(0, 0, 0));
-			if(actor && parent)
-				actor->AttachToActor(parent, FAttachmentTransformRules::KeepRelativeTransform);
+			if (actor && Parent)
+				actor->AttachToActor(Parent, FAttachmentTransformRules::KeepRelativeTransform);
 			return actor;
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Class is not derived from Actor. %s"), *ClassName);
+			UE_LOG(LogTemp, Warning, TEXT("Class is not derived from Actor. %s"), *NewClass->GetName());
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Failed to find class. %s"), *ClassName);
+		UE_LOG(LogTemp, Warning, TEXT("Failed to find class."));
 	}
-
 	return nullptr;
 }

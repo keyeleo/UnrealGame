@@ -18,7 +18,8 @@ function actor:ReceiveBeginPlay()
     print("---------world=", obj);
 
     path = "Blueprint'/Game/Blueprints/Stairs.Stairs_C'";
-    obj=Asset.SpawnActor(self,path);
+    obj=Asset.SpawnActor(self,nil,path);
+    obj=Asset.SpawnActor(self,obj,"");
     print("---------actor=", obj);
 end
 
