@@ -15,6 +15,7 @@
 #define LUA_LIB
 #include "CoreMinimal.h"
 #include "lua/lua.hpp"
+#include "Misc/CoreMisc.h"
 #include "UObject/UnrealType.h"
 #include "UObject/WeakObjectPtr.h"
 #include "Blueprint/UserWidget.h"
@@ -177,7 +178,7 @@ namespace NS_SLUA {
     {
     private:
 
-#define CHECK_UD_VALID(ptr) if (ptr && ptr->flag&UD_HADFREE) { \
+		#define CHECK_UD_VALID(ptr) if (ptr && ptr->flag&UD_HADFREE) { \
 		if (checkfree) \
 			luaL_error(L, "arg %d had been freed(%p), can't be used", lua_absindex(L, p), ptr->ud); \
 		else \
@@ -212,7 +213,6 @@ namespace NS_SLUA {
 			if (!t && lua_isuserdata(L, p)) {
 				luaL_getmetafield(L, p, "__name");
 				if (lua_isnil(L, -1)) {
-					lua_pop(L, 1);
 					return t;
 				}
 				FString clsname(lua_tostring(L, -1));
@@ -225,7 +225,10 @@ namespace NS_SLUA {
 			}
 			else if (!t)
 				return maybeAnUDTable<T>(L, p,checkfree);
-            return t;
+
+			// check UObject is valid
+			if (isUObjectValid(t)) return t;
+            return nullptr;
         }
 
         // testudata, if T is uobject
@@ -240,8 +243,9 @@ namespace NS_SLUA {
 				auto wptr = (UserData<WeakUObjectUD*>*)ptr;
 				return wptr->ud->get();
 			}
-			else
-				return ptr?ptr->ud:nullptr;
+			else if (isUObjectValid(ptr->ud) || !checkfree)
+				return ptr->ud;
+			return nullptr;
         }
 
 		template<class T>
@@ -317,6 +321,11 @@ namespace NS_SLUA {
 		static void finishType(lua_State* L, const char* tn, lua_CFunction ctor, lua_CFunction gc, lua_CFunction strHint=nullptr);
 		static void fillParam(lua_State* L, int i, UFunction* func, uint8* params);
 		static int returnValue(lua_State* L, UFunction* func, uint8* params);
+
+		// check UObject is valid
+		static bool isUObjectValid(UObject* obj) {
+			return obj && !obj->IsUnreachable() && !obj->IsPendingKill();
+		}
 		
 		static void callUFunction(lua_State* L, UObject* obj, UFunction* func, uint8* params);
 		// create new enum type to lua, see DefEnum macro
@@ -355,13 +364,14 @@ namespace NS_SLUA {
             if(ret) return ret;
 
             const char *typearg = nullptr;
-            if (luaL_getmetafield(L, p, "__name") == LUA_TSTRING)
+            int tt = luaL_getmetafield(L, p, "__name");
+            if (tt == LUA_TSTRING)
                 typearg = lua_tostring(L, -1);
-                
-            lua_pop(L,1);
+
+            if(tt!=LUA_TNIL) lua_pop(L,1);
 
             if(checkfree && !typearg)
-                luaL_error(L,"expect userdata at %d",p);
+                luaL_error(L,"expect userdata at %d, if you passed an UObject, maybe it's unreachable",p);
 
 			if (LuaObject::isBaseTypeOf(L, typearg, TypeName<T>::value().c_str())) {
 				UserData<T*> *udptr = reinterpret_cast<UserData<T*>*>(lua_touserdata(L, p));
@@ -369,7 +379,7 @@ namespace NS_SLUA {
 				return udptr->ud;
 			}
             if(checkfree) 
-				luaL_error(L,"expect userdata %s, but got %s",TypeName<T>::value().c_str(),typearg);
+				luaL_error(L,"expect userdata %s, but got %s, if you passed an UObject, maybe it's unreachable",TypeName<T>::value().c_str(),typearg);
             return nullptr;
         }
 
@@ -466,13 +476,6 @@ namespace NS_SLUA {
 			using ValueType = typename TPairTraits<typename T::ElementType>::ValueType;
 			return UD->asTMap<KeyType, ValueType>(L);
 		}
-
-        template<class T>
-        static UObject* checkUObject(lua_State* L,int p) {
-            UserData<UObject*>* ud = reinterpret_cast<UserData<UObject*>*>(luaL_checkudata(L, p,"UObject"));
-            if(!ud) luaL_error(L, "checkValue error at %d",p);
-            return Cast<T>(ud->ud);
-        }
 
         template<typename T>
         static void* void_cast( const T* v ) {
