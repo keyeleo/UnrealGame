@@ -27,9 +27,9 @@
 #define LUABASE_BODY(NAME) \
 protected: \
 	virtual void BeginPlay() override { \
-	if (!init(this, #NAME, LuaStateName, LuaFilePath)) return; \
+		if (init(this, #NAME, LuaStateName, LuaFilePath)) \
+			PrimaryActorTick.SetTickFunctionEnable(postInit("bCanEverTick")); \
 		Super::BeginPlay(); \
-		PrimaryActorTick.SetTickFunctionEnable(postInit("bCanEverTick")); \
 	} \
 	virtual void Tick(float DeltaTime) override { \
 		tick(DeltaTime); \
