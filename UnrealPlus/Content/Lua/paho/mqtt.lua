@@ -413,50 +413,45 @@ function MQTT.client:handler()                                    -- Public API
       return(error_message)
     end
 
-    if (buffer ~= nil and #buffer > 0) then
+    if self.buffer==nil then
+      self.buffer=buffer
+    else
+      self.buffer=self.buffer..buffer
+    end
+
+    if (self.buffer ~= nil and #self.buffer > 0) then
       local index = 1
 
       -- Parse individual messages (each must be at least 2 bytes long)
       -- Decode "remaining length" (MQTT v3.1 specification pages 6 and 7)
 
-      while (index < #buffer) do
-        local message_type_flags = string.byte(buffer, index)
+      while (index < #self.buffer) do
+        local message_type_flags = string.byte(self.buffer, index)
         local multiplier = 1
         local remaining_length = 0
 
+        local flag_index=index
         repeat
           index = index + 1
-          local digit = string.byte(buffer, index)
+          local digit = string.byte(self.buffer, index)
           remaining_length = remaining_length + ((digit % 128) * multiplier)
           multiplier = multiplier * 128
         until digit < 128                              -- check continuation bit
 
-        local message = string.sub(buffer, index + 1, index + remaining_length)
 
-        if (#message == remaining_length) then
+
+        if #self.buffer >= index + remaining_length then
+          local message = string.sub(self.buffer, index + 1, index + remaining_length)
           self:parse_message(message_type_flags, remaining_length, message)
+          if #self.buffer == index + remaining_length then
+            self.buffer=nil
+            break
+          else
+            index = index + remaining_length + 1
+          end
         else
-          MQTT.Utility.debug(
-            "MQTT.client:handler(): Incorrect remaining length: " ..
-            remaining_length .. " ~= message length: " .. #message
-          )
-        end
-
-        index = index + remaining_length + 1
-      end
-
-      -- Check for any left over bytes, i.e. partial message received
-
-      if (index ~= (#buffer + 1)) then
-        local error_message =
-          "MQTT.client:handler(): Partial message received" ..
-          index .. " ~= " .. (#buffer + 1)
-
-        if (MQTT.ERROR_TERMINATE) then         -- TODO: Refactor duplicate code
-          self:destroy()
-          error(error_message)
-        else
-          MQTT.Utility.debug(error_message)
+          self.buffer = string.sub(self.buffer, flag_index)
+          break
         end
       end
     end
