@@ -4,8 +4,8 @@ require('WebClient')
 local json=require('common/json')
 
 Topic={
-	system	="sgcc/system/v1/1",		--system informations
-	thing	="sgcc/thing/v1/1",		--things
+	system	="sgcc/system/v1/",		--system informations
+	thing	="sgcc/thing/v1/",		--things
 	hotfix	="sgcc/hotfix/v1/1",		--hotfix things
 	data	="sgcc/data/v1/1",		--real-time data
 	warn	="sgcc/warn/v1/1",		--warning data
@@ -14,8 +14,8 @@ Topic={
 MsgHandler={}
 
 function MsgHandler.handle(topic, message)
-	print("------- Received: topic=",topic)
-    print("------- Received: message=", message)
+	print("------- Received: topic=",topic,", len=",#topic+#message, ', msg=', #message)
+    -- print("------- Received: message=", message)
     if topic==Topic.system then
     	local system=json.decode(message)
 	    print("------- system: message=", system)

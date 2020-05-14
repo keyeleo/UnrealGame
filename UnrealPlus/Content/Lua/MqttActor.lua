@@ -9,8 +9,6 @@ function actor:initialize()
 	local MqttClientID=config.mqttClientID
 	local url=MqttHost
 
-	url='graphic.biad.com.cn:39018'
-
 	local arr=string.split(url,':')
 	local mqtt = require 'paho.mqtt'
 	self.client = mqtt.client.create(arr[1],arr[2],function(topic, message)
@@ -19,9 +17,11 @@ function actor:initialize()
 		end
 	end)
 
+	local pid="nanjing"
 	self.client:connect(MqttClientID)
-	self.client:subscribe({Topic.system, Topic.thing, Topic.hotfix, Topic.data, Topic.warn, "test/2"})
-	self.client:publish("test/2","{\"name\":\"vic\",\"message\":\"from unreal\"}")
+	self.client:subscribe({Topic.thing..pid.."/+", "test/2"})
+	-- self.client:subscribe({Topic.system, Topic.thing, Topic.hotfix, Topic.data, Topic.warn, "test/2"})
+	-- self.client:publish("test/2","{\"name\":\"vic\",\"message\":\"from unreal\"}")
 end
 
 -- override event from blueprint
