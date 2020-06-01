@@ -15,5 +15,5 @@ class FFMPEGMEDIA_API UFFMPEGMediaExporter : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 	
     UFUNCTION(BlueprintCallable, Category = "Media")
-    static void Export(const FString& Url, const FString& OutputFile);
+    static void Export(const FString& Url, const FString& OutputFile, int Length=300);
 };

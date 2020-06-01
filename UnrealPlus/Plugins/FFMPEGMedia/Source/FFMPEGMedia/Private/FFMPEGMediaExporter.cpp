@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "FFMPEGMediaExporter.h"
 #include "FFMPEGMediaPrivate.h"
 #include "LambdaFunctionRunnable.h"
@@ -11,25 +10,13 @@ extern  "C" {
 #include "libavutil/time.h"
 }
 
-void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile){
-    LambdaFunctionRunnable::RunThreaded("ExportThread", [Url, OutputFile]() {
-        AVPacket pkt;
-        AVFormatContext *input_fmtctx = NULL;
-        AVFormatContext *output_fmtctx = NULL;
-        AVCodecContext *enc_ctx = NULL;
-        AVCodecContext *dec_ctx = NULL;
-        AVCodec *encoder = NULL;
-        int max_seconds = 10;
-        int ret = 0;
-        int i = 0;
-        
+void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile, int max_seconds){
+    LambdaFunctionRunnable::RunThreaded("ExportThread", [Url, OutputFile, max_seconds]() {
         const char* fin=TCHAR_TO_ANSI(*Url);
         const char* fout=TCHAR_TO_ANSI(*OutputFile);
         
         AVDictionary *format_opts = NULL;
-        input_fmtctx = avformat_alloc_context();
-        //    input_fmtctx->interrupt_callback.callback = DecodeInterruptCallback;
-        //    input_fmtctx->interrupt_callback.opaque = this;
+        AVFormatContext* input_fmtctx = avformat_alloc_context();
         if (!av_dict_get(format_opts, "scan_all_pmts", NULL, AV_DICT_MATCH_CASE)) {
             av_dict_set(&format_opts, "scan_all_pmts", "1", AV_DICT_DONT_OVERWRITE);
         }
@@ -43,6 +30,7 @@ void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile)
             if (Url.StartsWith(TEXT("rtsp://"))){
                 av_dict_set(&format_opts, "rtsp_transport", "tcp", 0);
                 av_dict_set(&format_opts, "max_delay", "100", 0);
+                av_dict_set(&format_opts, "flush_packets", "1", 0);
                 av_dict_set_int(&format_opts, "stimeout", (int64_t)10000000, 0);
                 
                 //FormatContext->probesize = 100 * 1024;
@@ -64,10 +52,10 @@ void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile)
                 UE_LOG(LogFFMPEGMedia, Error, TEXT("Failed to retrieve input stream information %s"), *Url);
                 break;
             }
-            
-            av_dump_format(input_fmtctx, 0, fin, 0);
+            //av_dump_format(input_fmtctx, 0, fin, 0);
             
             // alloc output
+            AVFormatContext *output_fmtctx = NULL;
             if (avformat_alloc_output_context2(&output_fmtctx, NULL, NULL, fout) < 0) {
                 UE_LOG(LogFFMPEGMedia, Error, TEXT("Cannot open output stream %s"), *OutputFile);
                 break;
@@ -75,7 +63,7 @@ void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile)
             //read & write
             while(true){
                 bool err_stream=false;
-                for (i = 0; i < input_fmtctx->nb_streams; i++) {
+                for (int i = 0; i < input_fmtctx->nb_streams; i++) {
                     AVStream *in_stream = input_fmtctx->streams[i];
                     if(in_stream->codecpar->codec_id==AV_CODEC_ID_NONE)
                         continue;
@@ -91,8 +79,7 @@ void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile)
                 }
                 if(err_stream)
                     break;
-                
-                av_dump_format(output_fmtctx, 0, fout, 1);
+                //av_dump_format(output_fmtctx, 0, fout, 1);
                 
                 // open output
                 if (avio_open(&output_fmtctx->pb, fout, AVIO_FLAG_WRITE) < 0) {
@@ -102,11 +89,12 @@ void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile)
                 
                 while(true){
                     // write
-                    if ((ret = avformat_write_header(output_fmtctx, NULL)) < 0) {
+                    if (avformat_write_header(output_fmtctx, NULL) < 0) {
                         UE_LOG(LogFFMPEGMedia, Error, TEXT("Cannot write the header"));
                         break;
                     }
 
+                    AVPacket pkt;
                     av_init_packet(&pkt);
                     pkt.data = NULL;
                     pkt.size = 0;
@@ -115,8 +103,7 @@ void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile)
                         AVStream *in_stream = NULL;
                         AVStream *out_stream = NULL;
                         
-                        ret = av_read_frame(input_fmtctx, &pkt);
-                        if (ret < 0) {
+                        if (av_read_frame(input_fmtctx, &pkt) < 0) {
                             UE_LOG(LogFFMPEGMedia, Warning, TEXT("Read frame error"));
                             break;
                         }
@@ -124,7 +111,7 @@ void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile)
                         in_stream = input_fmtctx->streams[pkt.stream_index];
                         out_stream = output_fmtctx->streams[pkt.stream_index];
                         
-                        if (av_q2d(in_stream->time_base) * pkt.pts > max_seconds) {
+                        if (max_seconds>0 && av_q2d(in_stream->time_base) * pkt.pts > max_seconds) {
                             break;
                         }
                         
@@ -138,9 +125,8 @@ void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile)
                         }
                         pkt.duration = av_rescale_q(pkt.duration, in_stream->time_base, out_stream->time_base);
                         pkt.pos = -1;
-                        ret = av_write_frame(output_fmtctx, &pkt);
                         
-                        if (ret < 0) {
+                        if (av_write_frame(output_fmtctx, &pkt) < 0) {
                             UE_LOG(LogFFMPEGMedia, Warning, TEXT("Muxing Error"));
                             break;
                         }
