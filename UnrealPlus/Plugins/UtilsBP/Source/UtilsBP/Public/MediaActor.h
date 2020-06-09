@@ -28,12 +28,14 @@ public:
     virtual void Tick(float DeltaTime) override;
     
     UFUNCTION(BlueprintCallable, Category = "Media|MediaPlayer")
-    void BindMesh(UStaticMeshComponent* StaticMeshComponent, int MaterialIndex=0, const FString& TextureParameterName=TEXT("MediaTexture"));
+		void BindMesh(UStaticMeshComponent* StaticMeshComponent, int MaterialIndex=0, const FString& TextureParameterName=TEXT("MediaTexture"));
     UFUNCTION(BlueprintCallable, Category = "Media|MediaPlayer")
-    void BindWidget(UWidgetComponent* WidgetComponent, const FString& ImageName=TEXT("Video"), const FString& TextureParameterName=TEXT("MediaTexture"));
+		void BindWidget(UWidgetComponent* WidgetComponent, const FString& ImageName=TEXT("Video"), const FString& TextureParameterName=TEXT("MediaTexture"));
     
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MediaTexture")
-    UMediaPlayer* MediaPlayer;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MediaTexture")
-    UMediaTexture* MediaTexture;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
+		FString URL;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
+		UMediaPlayer* MediaPlayer;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
+		UMediaTexture* MediaTexture;
 };

@@ -27,13 +27,13 @@ void AMediaActor::CreateBind() {
     MediaPlayer = NewObject<UMediaPlayer>(GetTransientPackage(), MakeUniqueObjectName(GetTransientPackage(), UMediaPlayer::StaticClass()));
     
     if (MediaPlayer != nullptr){
-        UE_LOG(LogTemp, Log, TEXT("---- Create MediaPlayer %s"), *MediaPlayer->GetName());
         FString AssetName = MediaPlayer->GetName() + TEXT("_Video");
         MediaTexture = NewObject<UMediaTexture>(GetTransientPackage(), UMediaTexture::StaticClass(), FName(*AssetName), RF_Public | RF_Standalone | RF_Transactional);
         
         if (MediaTexture != nullptr){
-            UE_LOG(LogTemp, Log, TEXT("---- Create MediaTexture %s"), *MediaTexture->GetName());
-            MediaTexture->SetDefaultMediaPlayer(MediaPlayer);
+			MediaTexture->AutoClear = true;
+			MediaTexture->SetMediaPlayer(MediaPlayer);
+			MediaTexture->UpdateResource();
             
             TInlineComponentArray<UActorComponent*> Components;
             GetComponents(Components);
@@ -49,6 +49,9 @@ void AMediaActor::CreateBind() {
                 }
             }
         }
+
+		if (!URL.IsEmpty())
+			MediaPlayer->OpenUrl(URL);
     }
 }
 
@@ -58,7 +61,6 @@ void AMediaActor::BindMesh(UStaticMeshComponent* StaticMeshComponent, int Materi
     if(Mid!=nullptr){
         StaticMeshComponent->SetMaterial(MaterialIndex, Mid);
         Mid->SetTextureParameterValue(FName(*TextureParameterName), MediaTexture);
-        UE_LOG(LogTemp, Log, TEXT("Bind Material for %s"), *StaticMeshComponent->GetName());
     }
 }
 
@@ -70,7 +72,6 @@ void AMediaActor::BindWidget(UWidgetComponent* WidgetComponent, const FString& I
             UMaterialInstanceDynamic* Mid = Cast<UImage>(Widget)->GetDynamicMaterial();
             if(Mid!=nullptr){
                 Mid->SetTextureParameterValue(FName(*TextureParameterName), MediaTexture);
-                UE_LOG(LogTemp, Log, TEXT("Bind Material for %s"), *Widget->GetName());
             }
         }
     }
