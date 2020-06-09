@@ -37,9 +37,11 @@ public class UtilsBP : ModuleRules
 			{
 				"CoreUObject",
 				"Engine",
+                "MediaAssets",
 				"Slate",
 				"SlateCore",
-				// ... add private dependencies that you statically link with here ...	
+                "UMG",
+				// ... add private dependencies that you statically link with here ...
 			}
 			);
 		
