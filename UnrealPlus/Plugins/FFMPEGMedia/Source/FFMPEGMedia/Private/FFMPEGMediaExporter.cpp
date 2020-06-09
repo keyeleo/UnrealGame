@@ -63,7 +63,7 @@ void UFFMPEGMediaExporter::Export(const FString& Url, const FString& OutputFile,
             //read & write
             while(true){
                 bool err_stream=false;
-                for (int i = 0; i < input_fmtctx->nb_streams; i++) {
+                for (size_t i = 0; i < input_fmtctx->nb_streams; i++) {
                     AVStream *in_stream = input_fmtctx->streams[i];
                     if(in_stream->codecpar->codec_id==AV_CODEC_ID_NONE)
                         continue;

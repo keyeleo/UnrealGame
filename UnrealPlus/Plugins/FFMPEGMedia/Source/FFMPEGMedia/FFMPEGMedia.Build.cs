@@ -114,10 +114,12 @@ public class FFMPEGMedia : ModuleRules
 				"Core",
 				"CoreUObject",
 				"Engine",
-				"MediaUtils",
+                "MediaUtils",
+                "MediaAssets",
 				"RenderCore",
 				"FFMPEGMediaFactory",
-				"Projects",
+                "Projects",
+                "UMG",
 			});
 
 		PrivateIncludePathModuleNames.AddRange(
