@@ -52,7 +52,9 @@ void AMediaActor::CreateBind() {
 
 		if (!URL.IsEmpty())
 			MediaPlayer->OpenUrl(URL);
-    }
+		else
+			UE_LOG(LogTemp, Warning, TEXT("MediaActor created with URL empty"));
+	}
 }
 
 void AMediaActor::BindMesh(UStaticMeshComponent* StaticMeshComponent, int MaterialIndex, const FString& TextureParameterName){

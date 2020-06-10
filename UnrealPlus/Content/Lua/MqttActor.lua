@@ -19,9 +19,13 @@ function actor:initialize()
 
 	local pid="nanjing"
 	self.client:connect(MqttClientID)
-	self.client:subscribe({Topic.thing..pid.."/+", "test/2"})
-	-- self.client:subscribe({Topic.system, Topic.thing, Topic.hotfix, Topic.data, Topic.warn, "test/2"})
-	-- self.client:publish("test/2","{\"name\":\"vic\",\"message\":\"from unreal\"}")
+	if self.client.connected then
+		self.client:subscribe({Topic.thing..pid.."/+", "test/2"})
+		-- self.client:subscribe({Topic.system, Topic.thing, Topic.hotfix, Topic.data, Topic.warn, "test/2"})
+		-- self.client:publish("test/2","{\"name\":\"vic\",\"message\":\"from unreal\"}")
+	else
+		print('mqtt not connected')
+	end
 end
 
 -- override event from blueprint
@@ -39,7 +43,9 @@ function actor:ReceiveEndPlay(reason)
 end
 
 function actor:ReceiveTick(dt)
-    self.client:handler()
+	if self.client.connected then
+    	self.client:handler()
+    end
 end
 
 return actor
