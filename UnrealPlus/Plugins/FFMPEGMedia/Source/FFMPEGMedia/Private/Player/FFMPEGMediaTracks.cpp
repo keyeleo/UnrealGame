@@ -251,9 +251,6 @@ void FFFMPEGMediaTracks::Initialize(AVFormatContext* ic, const FString& Url)
 	UE_LOG(LogFFMPEGMedia, Verbose, TEXT("Tracks: %p: Initializing (media source %p)"), this, ic);
 
 	{
-		MediaSourceChanged = true;
-		SelectionChanged = true;
-
 		if (!ic)
 		{
 			CurrentState = EMediaState::Error;
@@ -293,7 +290,7 @@ void FFFMPEGMediaTracks::Initialize(AVFormatContext* ic, const FString& Url)
 		//
 
 		bool AllStreamsAdded = true;
-
+		bool VideoStreamAdded = false;
 		for (int i = 0; i < (int)ic->nb_streams; i++) {
 			AVStream* st = ic->streams[i];
 			bool streamAdded = AddStreamToTracks(i, false, Info);
@@ -302,6 +299,7 @@ void FFFMPEGMediaTracks::Initialize(AVFormatContext* ic, const FString& Url)
 				totalStreams++;
 			}
 			enum AVMediaType type = st->codecpar->codec_type;
+			if (type == AVMediaType::AVMEDIA_TYPE_VIDEO) VideoStreamAdded = true;
 			st->discard = AVDISCARD_ALL;
 		}
 
@@ -309,6 +307,13 @@ void FFFMPEGMediaTracks::Initialize(AVFormatContext* ic, const FString& Url)
 		{
 			UE_LOG(LogFFMPEGMedia, Verbose, TEXT("Tracks %p: Not all available streams were added to the track collection"), this);
 		}
+		if (!VideoStreamAdded) {
+			UE_LOG(LogFFMPEGMedia, Warning, TEXT("No video track found"));
+			return;
+		}
+
+		MediaSourceChanged = true;
+		SelectionChanged = true;
 
 		int64_t duration = ic->duration + (ic->duration <= INT64_MAX - 5000 ? 5000 : 0);
 
