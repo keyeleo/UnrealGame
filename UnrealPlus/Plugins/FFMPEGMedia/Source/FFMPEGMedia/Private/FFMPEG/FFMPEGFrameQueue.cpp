@@ -71,7 +71,7 @@ FFMPEGFrame *FFMPEGFrameQueue::PeekWritable() {
     }
     mutex.Unlock();
 
-    if (pktq->IsAbortRequest())
+    if (pktq && pktq->IsAbortRequest())
         return NULL;
 
     return queue[windex];
@@ -84,7 +84,7 @@ FFMPEGFrame *FFMPEGFrameQueue::PeekReadable() {
     }
     mutex.Unlock();
 
-    if (pktq->IsAbortRequest())
+    if (pktq && pktq->IsAbortRequest())
         return NULL;
 
     return queue[(rindex + rindex_shown) % max_size];
@@ -141,7 +141,7 @@ int FFMPEGFrameQueue::GetNumRemaining() {
 
 int64_t FFMPEGFrameQueue::GetQueueLastPos() {
     FFMPEGFrame *fp = queue[rindex];
-    if (rindex_shown && fp->GetSerial() == pktq->GetSerial())
+    if (rindex_shown && pktq && fp->GetSerial() == pktq->GetSerial())
         return fp->GetPos();
     else
         return -1;

@@ -9,6 +9,7 @@ CondWait::CondWait() {
 CondWait::~CondWait() {
     if ( event ) {
         FGenericPlatformProcess::ReturnSynchEventToPool(event);
+		event = nullptr;
     }
 }
     
@@ -23,18 +24,17 @@ int CondWait::wait(FCriticalSection& mutex) {
 }
 
 int CondWait::waitTimeout(FCriticalSection& mutex , unsigned int ms) {
-
-    mutex.Unlock();
-    if ( ms == 0) {
-        event->Wait();
-        mutex.Lock();
-        return 0;
-    } else {
-        bool wait_result =  event->Wait(FTimespan::FromMicroseconds(ms));
-        mutex.Lock();
-        if ( !wait_result) {
-            return 1;
-        }
-        return 0;
-    }
+	if (event) {
+		mutex.Unlock();
+		if (ms == 0) {
+			event->Wait();
+			mutex.Lock();
+		}else {
+			bool wait_result = event->Wait(FTimespan::FromMicroseconds(ms));
+			mutex.Lock();
+			if (!wait_result)
+				return 1;
+		}
+	}
+	return 0;
 }

@@ -1720,7 +1720,7 @@ void FFFMPEGMediaTracks::StreamComponentClose(int stream_index) {
         break;
     }
 
-	if (FormatContext->streams)
+	if (FormatContext->streams && FormatContext->streams[stream_index])
 	{
 		FormatContext->streams[stream_index]->discard = AVDISCARD_ALL;
 	}
