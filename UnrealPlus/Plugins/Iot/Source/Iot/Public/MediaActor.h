@@ -10,7 +10,7 @@ class UMediaPlayer;
 class UMediaTexture;
 
 UCLASS()
-class UTILSBP_API AMediaActor : public AActor
+class IOT_API AMediaActor : public AActor
 {
     GENERATED_BODY()
     

@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class UTILSBP_API UAssetLibrary : public UBlueprintFunctionLibrary
+class IOT_API UAssetLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 	
