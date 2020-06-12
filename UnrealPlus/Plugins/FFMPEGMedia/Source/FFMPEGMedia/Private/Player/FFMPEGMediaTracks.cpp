@@ -106,11 +106,8 @@ FFFMPEGMediaTracks::FFFMPEGMediaTracks()
     , ShouldLoop(false)
 	, bPrerolled(false)
 	, imgConvertCtx(NULL)
-    , readThread (nullptr)
-    , audioThread (nullptr)
-    , videoThread (nullptr)
-	, subtitleThread(nullptr)
-    , displayThread (nullptr)
+	, audioRenderThread(nullptr)
+	, displayThread (nullptr)
     , audioStream(NULL)
     , videoStream(NULL)
     , subTitleStream(NULL)
@@ -370,13 +367,8 @@ void FFFMPEGMediaTracks::Shutdown()
     subtitleStreamIdx = -1;
 
 	aborted = true;
-    readThread = nullptr;
 
-    audioThread = nullptr;
-    videoThread = nullptr;
-    subtitleThread = nullptr;
-
-     /*hw_device_ctx(NULL)
+	/*hw_device_ctx(NULL)
     , hw_frames_ctx(NULL)
     , hwaccel_ctx(NULL)
     , hwAccelPixFmt(AV_PIX_FMT_NONE)*/
@@ -1683,8 +1675,8 @@ int FFFMPEGMediaTracks::StreamComponentOpen(int stream_index) {
 }
 void FFFMPEGMediaTracks::StreamComponentClose(int stream_index) {
     AVCodecParameters *codecpar;
-    if (stream_index < 0 || stream_index >= (int)FormatContext->nb_streams)
-        return;
+	if (stream_index < 0 || stream_index >= (int)FormatContext->nb_streams)
+		return;
     codecpar = FormatContext->streams[stream_index]->codecpar;
 
     switch (codecpar->codec_type) {
@@ -2160,6 +2152,7 @@ int FFFMPEGMediaTracks::ReadThread() {
             av_packet_unref(pkt);
         }
     }
+	av_usleep(1000000);
     return ret;
 }
 
@@ -2674,6 +2667,8 @@ void FFFMPEGMediaTracks::VideoRefresh(double *remaining_time) {
 
 
 int FFFMPEGMediaTracks::GetVideoFrame(AVFrame *frame) {
+	if (!viddec)
+		return -1;
 
     const auto Settings = GetDefault<UFFMPEGMediaSettings>();
 

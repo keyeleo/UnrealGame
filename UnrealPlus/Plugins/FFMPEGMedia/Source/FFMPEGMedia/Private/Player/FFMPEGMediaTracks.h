@@ -465,12 +465,7 @@ private:
 
     struct SwsContext *imgConvertCtx;
     
-    FRunnableThread* readThread;
-    FRunnableThread* audioThread;
-    FRunnableThread* videoThread;
-    FRunnableThread* subtitleThread;
     FRunnableThread* displayThread;
-    
     FRunnableThread* audioRenderThread;
 
     AVStream *audioStream;

@@ -55,7 +55,7 @@ FFFMPEGMediaPlayer::~FFFMPEGMediaPlayer()
 
 	if (ReadThread)
 	{
-//		ReadThread->Kill(false);
+		ReadThread->WaitForCompletion();
 		//delete ReadThread;
 		ReadThread = nullptr;
 	}

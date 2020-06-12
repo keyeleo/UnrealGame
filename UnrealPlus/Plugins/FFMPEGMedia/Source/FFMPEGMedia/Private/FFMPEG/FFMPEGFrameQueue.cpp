@@ -65,9 +65,8 @@ FFMPEGFrame *FFMPEGFrameQueue::PeekLast() {
 
 FFMPEGFrame *FFMPEGFrameQueue::PeekWritable() {
     mutex.Lock();
-    while (size >= max_size &&
-        !pktq->IsAbortRequest()) {
-        cond.wait(mutex);
+    while (size >= max_size && pktq && !pktq->IsAbortRequest()) {
+		cond.wait(mutex);
     }
     mutex.Unlock();
 
@@ -78,10 +77,9 @@ FFMPEGFrame *FFMPEGFrameQueue::PeekWritable() {
 }
 FFMPEGFrame *FFMPEGFrameQueue::PeekReadable() {
     mutex.Lock();
-    while (size - rindex_shown <= 0 &&
-        !pktq->IsAbortRequest()) {
-        cond.wait(mutex);
-    }
+    while (size - rindex_shown <= 0 && pktq && !pktq->IsAbortRequest()) {
+		cond.wait(mutex);
+	}
     mutex.Unlock();
 
     if (pktq && pktq->IsAbortRequest())
