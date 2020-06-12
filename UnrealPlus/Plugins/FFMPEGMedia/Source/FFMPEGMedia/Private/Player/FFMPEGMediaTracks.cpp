@@ -1,5 +1,16 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
+extern  "C" {
+#include "libavformat/avformat.h"
+#include "libavcodec/avcodec.h"
+#include "libavutil/imgutils.h"
+#include "libavutil/hwcontext.h"
+#include "libavutil/time.h"
+#include "libswscale/swscale.h"
+#include "libswresample/swresample.h"
+    
+}
+
 #include "FFMPEGMediaTracks.h"
 #include "FFMPEGMediaPrivate.h"
 #include "LambdaFunctionRunnable.h"
@@ -26,17 +37,6 @@
 #include "FFMPEGMediaOverlaySample.h"
 #include "FFMPEGMediaAudioSample.h"
 #include "FFMPEGMediaTextureSample.h"
-
-extern  "C" {
-#include "libavformat/avformat.h"
-#include "libavcodec/avcodec.h"
-#include "libavutil/imgutils.h"
-#include "libavutil/hwcontext.h"
-#include "libavutil/time.h"
-#include "libswscale/swscale.h"
-#include "libswresample/swresample.h"
-
-}
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 
@@ -106,8 +106,8 @@ FFFMPEGMediaTracks::FFFMPEGMediaTracks()
     , ShouldLoop(false)
 	, bPrerolled(false)
 	, imgConvertCtx(NULL)
-	, audioRenderThread(nullptr)
 	, displayThread (nullptr)
+    , audioRenderThread(nullptr)
     , audioStream(NULL)
     , videoStream(NULL)
     , subTitleStream(NULL)
