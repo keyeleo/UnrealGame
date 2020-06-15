@@ -18,13 +18,12 @@ class IOT_API UIotComponentBase : public UStaticMeshComponent, public slua_Luaba
 	};
 protected:
 	virtual void BeginPlay() override {
-		if (!init(this, "ULuaStaticMeshComponent", LuaStateName, LuaFilePath))
+		Super::BeginPlay();
+		if (!init(this, "UIotComponentBase", LuaStateName, LuaFilePath))
 			return;
 		if (!GetClass()->HasAnyClassFlags(CLASS_CompiledFromBlueprint))
 			ReceiveBeginPlay();
 		PrimaryComponentTick.SetTickFunctionEnable(postInit("bCanEverTick"));
-
-		Super::BeginPlay();
 	}
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override {
@@ -56,7 +55,12 @@ public:
 	NS_SLUA::LuaVar getSelfTable() const {
 		return luaSelfTable;
 	}
-
+public:
+	UIotComponentBase(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get())
+		: UStaticMeshComponent(ObjectInitializer)
+	{
+		PrimaryComponentTick.bCanEverTick = true;
+	}
 public:
 	struct TickTmpArgs tickTmpArgs;
 	// below UPROPERTY and UFUNCTION can't be put to macro LUABASE_BODY
