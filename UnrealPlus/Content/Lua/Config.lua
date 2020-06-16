@@ -1,4 +1,4 @@
--- local VictoryBPFunctionLibrary=import('VictoryBPFunctionLibrary')
+local AssetLibrary=import('AssetLibrary')
 
 Config={}
 
@@ -10,9 +10,9 @@ function Config:instance()
 		-- config.mqttHost='graphic.biad.com.cn:39017'
 		config.mqttClientID="hellovic"
 
-		-- config.webHost=VictoryBPFunctionLibrary.VictoryGetCustomConfigVar_String('Server', 'WebServer', true, '')
-		-- config.mqttHost=VictoryBPFunctionLibrary.VictoryGetCustomConfigVar_String('MQTT', 'MqttHost', true, '')
-		-- config.mqttClientID=VictoryBPFunctionLibrary.VictoryGetCustomConfigVar_String('MQTT', 'MqttClientID', true, '')
+		-- config.webHost=AssetLibrary.GetGameConfig('WebServer', 'Server', false)
+		-- config.mqttHost=AssetLibrary.GetGameConfig('MqttHost', 'MQTT', false)
+		-- config.mqttClientID=AssetLibrary.GetGameConfig('MqttClientID', 'MQTT', false)
 	    print("mqttHost="..config.mqttHost)
 
 		self._instance=config

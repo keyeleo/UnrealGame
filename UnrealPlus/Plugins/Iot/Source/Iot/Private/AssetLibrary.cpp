@@ -9,6 +9,16 @@
 #include "Misc/Paths.h"
 #include "IPlatformFilePak.h"
 
+FString UAssetLibrary::GetGameConfig(const FString& Variable, const FString& Section, bool reload) {
+	if (!GConfig) return "";
+
+	if(reload)
+		FConfigCacheIni::LoadGlobalIniFile(GGameIni, TEXT("Game"), nullptr, true);
+	FString Value;
+	GConfig->GetString(	*Section,*Variable,	Value,GGameIni);
+	return Value;
+}
+
 void UAssetLibrary::LoadPakFile(TArray<FString>& AssetsList, FString FileName, FString MountPoint) {
     // Use FPaths::ProjectContentDir() as root
     MountPoint = FPaths::ProjectContentDir() + MountPoint;

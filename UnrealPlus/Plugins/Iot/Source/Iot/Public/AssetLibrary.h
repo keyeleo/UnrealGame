@@ -21,5 +21,8 @@ class IOT_API UAssetLibrary : public UBlueprintFunctionLibrary
 		static UObject* SyncLoadAsset(FString AssetName, FString Name = TEXT(""));
 
 	UFUNCTION(BlueprintCallable, Category = "AssetManager")
-		static AActor* SpawnActor(AActor* parent, UClass* Class=nullptr, FString ClassName= TEXT(""));
+		static AActor* SpawnActor(AActor* parent, UClass* Class = nullptr, FString ClassName = TEXT(""));
+
+	UFUNCTION(BlueprintCallable, Category = "AssetManager")
+		static FString GetGameConfig(const FString& Variable, const FString& Section = TEXT(""), bool reload=false);
 };

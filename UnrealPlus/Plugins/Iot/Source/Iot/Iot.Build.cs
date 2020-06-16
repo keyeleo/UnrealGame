@@ -10,12 +10,26 @@ public class Iot : ModuleRules
 
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Http", "PakFile" });
+        PublicDependencyModuleNames.AddRange(new string[] {
+            "Core", "CoreUObject", "Engine", "InputCore", "Http",
+            "PakFile",
+            "APEX",
+            "PhysX",
+        });
 
-        PrivateDependencyModuleNames.AddRange(new string[] { "slua_unreal", "slua_profile", "Slate", "SlateCore", "UMG", "Http", "MediaAssets" });
+        PrivateDependencyModuleNames.AddRange(new string[] {
+            "Slate", "SlateCore", "UMG",
+            "Http",
+            "slua_unreal", "slua_profile",
+            "MediaAssets"
+        });
 
-        PrivateIncludePathModuleNames.AddRange(new string[] { "slua_unreal" });
+        PrivateIncludePathModuleNames.AddRange(new string[] {
+            "slua_unreal"
+        });
 
-        PublicIncludePathModuleNames.AddRange(new string[] { "slua_unreal", "slua_profile" });
+        PublicIncludePathModuleNames.AddRange(new string[] {
+            "slua_unreal", "slua_profile"
+        });
 	}
 }
