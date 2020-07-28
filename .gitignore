@@ -7,5 +7,10 @@
 */Intermediate
 */Saved
 */Build
+*/Binaries
 */DerivedDataCache
+*/Plugins/*/Binaries
+*/Plugins/*/Intermediate
+*/Plugins/*/Binaries
 genesis
+
