@@ -10,7 +10,7 @@ namespace UnrealBuildTool.Rules
     {
         private void AddSignallingServer()
         {
-            string PixelStreamingProgramsDirectory = "./Programs/PixelStreaming";
+            string PixelStreamingProgramsDirectory = Path.Combine(ModuleDirectory, "../Programs/PixelStreaming");
             string SignallingServerDir = new DirectoryInfo(PixelStreamingProgramsDirectory + "/WebServers/SignallingWebServer").FullName;
 
             if (!Directory.Exists(SignallingServerDir))
@@ -22,12 +22,10 @@ namespace UnrealBuildTool.Rules
             List<string> DependenciesToAdd = new List<string>();
             DependenciesToAdd.AddRange(Directory.GetFiles(SignallingServerDir, "*.*", SearchOption.AllDirectories));
 
-            string NodeModulesDirPath = new DirectoryInfo(SignallingServerDir + "/node_modules").FullName;
             string LogsDirPath = new DirectoryInfo(SignallingServerDir + "/logs").FullName;
             foreach (string Dependency in DependenciesToAdd)
             {
-                if (!Dependency.StartsWith(NodeModulesDirPath) &&
-                    !Dependency.StartsWith(LogsDirPath))
+                if (!Dependency.StartsWith(LogsDirPath))
                 {
                     RuntimeDependencies.Add(Dependency, StagedFileType.NonUFS);
                 }
@@ -36,7 +34,7 @@ namespace UnrealBuildTool.Rules
 
         private void AddMatchmakingServer()
         {
-			string PixelStreamingProgramsDirectory = "./Programs/PixelStreaming";
+            string PixelStreamingProgramsDirectory = Path.Combine(ModuleDirectory, "../Programs/PixelStreaming");
             string MatchmakingServerDir = new DirectoryInfo(PixelStreamingProgramsDirectory + "/WebServers/Matchmaker").FullName;
 
             if (!Directory.Exists(MatchmakingServerDir))
@@ -48,12 +46,10 @@ namespace UnrealBuildTool.Rules
             List<string> DependenciesToAdd = new List<string>();
             DependenciesToAdd.AddRange(Directory.GetFiles(MatchmakingServerDir, "*.*", SearchOption.AllDirectories));
 
-            string NodeModulesDirPath = new DirectoryInfo(MatchmakingServerDir + "/node_modules").FullName;
             string LogsDirPath = new DirectoryInfo(MatchmakingServerDir + "/logs").FullName;
             foreach (string Dependency in DependenciesToAdd)
             {
-                if (!Dependency.StartsWith(NodeModulesDirPath) &&
-                    !Dependency.StartsWith(LogsDirPath))
+                if (!Dependency.StartsWith(LogsDirPath))
                 {
                     RuntimeDependencies.Add(Dependency, StagedFileType.NonUFS);
                 }
@@ -63,7 +59,7 @@ namespace UnrealBuildTool.Rules
 		private void AddWebRTCServers()
         {
             string webRTCRevision = "23789";
-            string webRTCRevisionDirectory = "./ThirdParty/WebRTC/rev." + webRTCRevision;
+            string webRTCRevisionDirectory = Path.Combine(ModuleDirectory, "../ThirdParty/WebRTC/rev." + webRTCRevision);
 			string webRTCProgramsDirectory = Path.Combine(webRTCRevisionDirectory, "programs/Win64/VS2017/release");
 
             List<string> DependenciesToAdd = new List<string>();
@@ -151,7 +147,7 @@ namespace UnrealBuildTool.Rules
             // for `FWmfMediaHardwareVideoDecodingTextureSample`
             // this really needs to be refactored to break dependency on WmfMedia plugin
             PrivateDependencyModuleNames.Add("WmfMedia");
-            PrivateIncludePaths.Add("../../../Media/WmfMedia/Source/WmfMedia/Private/");
+            PrivateIncludePaths.Add(Path.Combine(EngineDir, "Plugins/Media/WmfMedia/Source/WmfMedia/Private/"));
 
             AddEngineThirdPartyPrivateStaticDependencies(Target, "DX11");
             AddEngineThirdPartyPrivateStaticDependencies(Target, "DX9");
