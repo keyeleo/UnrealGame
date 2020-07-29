@@ -24,6 +24,10 @@ const defaultConfig = {
 	AdditionalRoutes: new Map()
 };
 
+console.error=function(msg){
+	console.logColor(logging.Red, msg);
+}
+
 const argv = require('yargs').argv;
 var configFile = (typeof argv.configFile != 'undefined') ? argv.configFile.toString() : '.\\config.json';
 console.log(`configFile ${configFile}`);
@@ -269,7 +273,7 @@ streamerServer.on('connection', function (ws, req) {
 	console.logColor(logging.Green, `Streamer connected: ${req.connection.remoteAddress}`);
 
 	ws.on('message', function onStreamerMessage(msg) {
-		console.logColor(logging.Blue, `<- Streamer: ${msg}`);
+		// console.logColor(logging.Blue, `<- Streamer: ${msg}`);
 	
 		try {
 			msg = JSON.parse(msg);
@@ -344,7 +348,7 @@ playerServer.on('connection', function (ws, req) {
 	}
 	
 	ws.on('message', function (msg) {
-		console.logColor(logging.Blue, `<- player ${playerId}: ${msg}`);
+		// console.logColor(logging.Blue, `<- player ${playerId}: ${msg}`);
 
 		try {
 			msg = JSON.parse(msg);
@@ -381,7 +385,7 @@ playerServer.on('connection', function (ws, req) {
 
 	function onPlayerDisconnected() {
 		players.delete(playerId);
-		streamer.send(JSON.stringify({type: 'playerDisconnected', playerId: playerId}));
+		// streamer.send(JSON.stringify({type: 'playerDisconnected', playerId: playerId}));
 		sendPlayerDisconnectedToFrontend();
 		sendPlayerDisconnectedToMatchmaker();
 		sendPlayersCount();
