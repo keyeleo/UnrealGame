@@ -1538,7 +1538,6 @@ function connect() {
 	ws.onclose = function (event) {
 		console.log(`WS closed: ${JSON.stringify(event.code)} - ${event.reason}`);
 		ws = undefined;
-		is_reconnection = true;
 
 		// destroy `webRtcPlayerObj` if any
 		let playerDiv = document.getElementById('player');
@@ -1548,7 +1547,12 @@ function connect() {
 			webRtcPlayerObj = undefined;
 		}
 
-		start();
+		if(event.code!=4000){
+			is_reconnection = true;
+			start();
+		}else{
+			console.error(`player been kicked!`)
+		}
 	};
 }
 

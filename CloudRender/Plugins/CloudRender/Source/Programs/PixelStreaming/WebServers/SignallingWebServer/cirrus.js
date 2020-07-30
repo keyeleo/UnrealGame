@@ -93,6 +93,7 @@ var matchmakerPort = 9999;
 var gameSessionId;
 var userSessionId;
 var serverPublicIp;
+var maxConnections = 4;
 
 // `clientConfig` is send to Streamer and Players
 // Example of STUN server setting
@@ -102,6 +103,10 @@ var clientConfig = { type: 'config', peerConnectionOptions: {} };
 // Parse public server address from command line
 // --publicIp <public address>
 try {
+	if (typeof config.maxconnections == 'number') {
+		maxConnections = config.maxconnections;
+	}
+
 	if (typeof config.publicIp != 'undefined') {
 		serverPublicIp = config.publicIp.toString();
 	}
@@ -333,6 +338,12 @@ playerServer.on('connection', function (ws, req) {
 	// Reject connection if streamer is not connected
 	if (!streamer || streamer.readyState != 1 /* OPEN */) {
 		ws.close(1013 /* Try again later */, 'Streamer is not connected');
+		return;
+	}
+
+	if(players.size+1>maxConnections){
+		ws.close(4000, 'kicked');
+		console.error(`max player (${req.connection.remoteAddress}) kicked`);
 		return;
 	}
 
