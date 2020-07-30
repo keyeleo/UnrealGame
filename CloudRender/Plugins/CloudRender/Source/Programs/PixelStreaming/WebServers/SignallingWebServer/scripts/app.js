@@ -19,7 +19,7 @@ var onDataChannelConnected;
 var responseEventListeners = new Map();
 
 var freezeFrameOverlay = null;
-var shouldShowPlayOverlay = true;
+var shouldShowPlayOverlay = false;
 // A freeze frame is a still JPEG image shown instead of the video.
 var freezeFrame = {
 	receiving: false,
@@ -228,6 +228,16 @@ function setOverlay(htmlClass, htmlElement, onClickFunction) {
 	videoPlayOverlay.classList.add(htmlClass);
 }
 
+function play(){
+	if(webRtcPlayerObj)
+		webRtcPlayerObj.video.play();
+
+	requestQualityControl();
+	showFreezeFrameOverlay();
+
+	hideOverlay();
+}
+
 function showConnectOverlay() {
 	var startText = document.createElement('div');
 	startText.id = 'playButton';
@@ -252,13 +262,7 @@ function showPlayOverlay() {
 	img.src = '/images/Play.png';
 	img.alt = 'Start Streaming';
 	setOverlay('clickableState', img, event => {
-		if (webRtcPlayerObj)
-			webRtcPlayerObj.video.play();
-
-		requestQualityControl();
-
-		showFreezeFrameOverlay();
-		hideOverlay();
+		play();
 	});
 	shouldShowPlayOverlay = false;
 }
@@ -369,24 +373,27 @@ function setupWebRtcPlayer(htmlElement, config) {
 	webRtcPlayerObj.onWebRtcOffer = function (offer) {
 		if (ws && ws.readyState === WS_OPEN_STATE) {
 			let offerStr = JSON.stringify(offer);
-			console.log(`-> SS: offer:\n${offerStr}`);
+			// console.log(`-> SS: offer:\n${offerStr}`);
 			ws.send(offerStr);
 		}
 	};
 
 	webRtcPlayerObj.onWebRtcCandidate = function (candidate) {
 		if (ws && ws.readyState === WS_OPEN_STATE) {
-			console.log(`-> SS: iceCandidate\n${JSON.stringify(candidate, undefined, 4)}`);
+			// console.log(`-> SS: iceCandidate\n${JSON.stringify(candidate, undefined, 4)}`);
 			ws.send(JSON.stringify({ type: 'iceCandidate', candidate: candidate }));
 		}
 	};
 
 	webRtcPlayerObj.onVideoInitialised = function () {
 		if (ws && ws.readyState === WS_OPEN_STATE) {
-			if (shouldShowPlayOverlay) {
+			if(is_reconnection)
+				play();
+			else if (shouldShowPlayOverlay) {
 				showPlayOverlay();
 				resizePlayerStyle();
-			}
+			}else
+				play();
 		}
 	};
 
@@ -537,7 +544,7 @@ function onWebRtcAnswer(webRTCData) {
 			if (aggregatedStats.timestampStart) {
 				if ((aggregatedStats.timestamp - aggregatedStats.timestampStart) > nextPrintDuration) {
 					if (ws && ws.readyState === WS_OPEN_STATE) {
-						console.log(`-> SS: stats\n${JSON.stringify(aggregatedStats)}`);
+						// console.log(`-> SS: stats\n${JSON.stringify(aggregatedStats)}`);
 						ws.send(JSON.stringify({ type: 'stats', data: aggregatedStats }));
 					}
 					nextPrintDuration += printInterval;
@@ -1473,10 +1480,15 @@ function start() {
 		statsDiv.innerHTML = 'Not connected';
 	}
 
-	if (!connect_on_load || is_reconnection) {
-		showConnectOverlay();
+	if(is_reconnection)
+		connect();
+	else if (!connect_on_load) {
+		// showConnectOverlay();
+		connect();
+		startAfkWarningTimer();
+
 		invalidateFreezeFrameOverlay();
-		shouldShowPlayOverlay = true;
+		// shouldShowPlayOverlay = true;
 		resizePlayerStyle();
 	} else {
 		connect();
@@ -1504,7 +1516,7 @@ function connect() {
 	ws = new WebSocket(window.location.href.replace('http://', 'ws://').replace('https://', 'wss://'));
 
 	ws.onmessage = function (event) {
-		console.log(`<- SS: ${event.data}`);
+		// console.log(`<- SS: ${event.data}`);
 		var msg = JSON.parse(event.data);
 		if (msg.type === 'config') {
 			onConfig(msg);
@@ -1544,7 +1556,7 @@ function connect() {
 function onConfig(config) {
 	let playerDiv = document.getElementById('player');
 	let playerElement = setupWebRtcPlayer(playerDiv, config);
-	resizePlayerStyle();
+	//resizePlayerStyle();
 
 	switch (inputOptions.controlScheme) {
 		case ControlSchemeType.HoveringMouse:
