@@ -608,6 +608,8 @@ void FPixelStreamingNvVideoEncoder::EncodeFrame(FBufferId BufferId, const webrtc
 
 	{
 		EFrameState State = Frame.State.Load();
+		if (State != EFrameState::Capturing)
+			return;
 		checkf(State == EFrameState::Capturing, TEXT("Buffer %d : Expected state %d, but found %d"), BufferId, (int)EFrameState::Captured, (int)State);
 	}
 
@@ -831,6 +833,8 @@ void FPixelStreamingNvVideoEncoder::UpdateRes(const FTexture2DRHIRef& BackBuffer
 
 void FPixelStreamingNvVideoEncoder::SubmitFrameToEncoder(FFrame& Frame)
 {
+	if (Frame.State.Load() != EFrameState::Captured)
+		return;
 	check(Frame.State.Load() == EFrameState::Captured);
 
 #if NVENC_VIDEO_ENCODER_DEBUG
@@ -927,6 +931,8 @@ void FPixelStreamingNvVideoEncoder::EncoderCheckLoop()
 
 void FPixelStreamingNvVideoEncoder::ProcessFrame(FFrame& Frame)
 {
+	if (Frame.State.Load() != EFrameState::Encoding)
+		return;
 	check(Frame.State.Load() == EFrameState::Encoding);
 
 	FOutputFrame& OutputFrame = Frame.OutputFrame;
