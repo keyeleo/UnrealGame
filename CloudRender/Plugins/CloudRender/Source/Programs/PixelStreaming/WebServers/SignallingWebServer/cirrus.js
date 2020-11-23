@@ -228,10 +228,42 @@ app.get('/', isAuthenticated('/login'), function (req, res) {
 	});
 });
 
+let players = new Map(); // playerId <-> player, where player is either a web-browser or a native webrtc player
+const httpClient = require('http');
+function notifyGate(count,callback){
+	if (typeof config.cloudrenderGate != 'undefined') {
+		let uri=config.cloudrenderGate+'/cloudrender/v1/node?uri='+serverPublicIp+':'+httpPort+'&count='+count;;
+		console.log('Notify '+uri);
+
+		httpClient.get(uri, (res) => {
+			res.resume();
+			if(callback)
+				callback();
+		}).on('error', (e) => {
+			console.log(`Got error: ${e.message}`);
+			if(callback)
+				callback();
+		});
+	}
+}
+process.on('SIGINT', () => {
+	notifyGate(-1, function(){
+	    console.log('Process interrupted');
+	    process.exit();
+	});
+})
+process.on('SIGTERM', () => {
+	notifyGate(-1, function(){
+	    console.log('Process terminated');
+	    process.exit();
+	});
+})
 
 //Setup http and https servers
 http.listen(httpPort, function () {
 	console.logColor(logging.Green, 'Http listening on *: ' + httpPort);
+	notifyGate(0);
+	setInterval(function(){notifyGate(players.size);}, 5*60*1000);	//5min
 });
 
 if (config.UseHTTPS) {
@@ -331,7 +363,6 @@ streamerServer.on('connection', function (ws, req) {
 let playerServer = new WebSocket.Server({ server: config.UseHTTPS ? https : http});
 console.logColor(logging.Green, `WebSocket listening to Players connections on :${httpPort}`)
 
-let players = new Map(); // playerId <-> player, where player is either a web-browser or a native webrtc player
 let nextPlayerId = 100;
 
 playerServer.on('connection', function (ws, req) {
@@ -356,6 +387,7 @@ playerServer.on('connection', function (ws, req) {
 		for (let p of players.values()) {
 			p.ws.send(playerCountMsg);
 		}
+		notifyGate(players.size);
 	}
 	
 	ws.on('message', function (msg) {
@@ -426,6 +458,7 @@ function disconnectAllPlayers(code, reason) {
 	for (let player of clone.values()) {
 		player.ws.close(code, reason);
 	}
+	notifyGate(-1);
 }
 
 /**
