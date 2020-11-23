@@ -244,7 +244,8 @@ function notifyGate(count,callback){
 			if(callback)
 				callback();
 		});
-	}
+	}else if(callback)
+		callback();
 }
 process.on('SIGINT', () => {
 	notifyGate(-1, function(){
