@@ -230,9 +230,11 @@ app.get('/', isAuthenticated('/login'), function (req, res) {
 
 let players = new Map(); // playerId <-> player, where player is either a web-browser or a native webrtc player
 const httpClient = require('http');
-function notifyGate(count,callback){
+function notifyGate(count,url,callback){
 	if (typeof config.cloudrenderGate != 'undefined') {
-		let uri=config.cloudrenderGate+'/cloudrender/v1/node?uri='+serverPublicIp+':'+httpPort+'&count='+count;;
+		let uri=config.cloudrenderGate+'/cloudrender/v1/node?uri='+serverPublicIp+':'+httpPort+'&count='+count;
+		if(url)
+			uri+='&params='+encodeURIComponent(url);
 		console.log('Notify '+uri);
 
 		httpClient.get(uri, (res) => {
@@ -248,13 +250,13 @@ function notifyGate(count,callback){
 		callback();
 }
 process.on('SIGINT', () => {
-	notifyGate(-1, function(){
+	notifyGate(-1, null, function(){
 	    console.log('Process interrupted');
 	    process.exit();
 	});
 })
 process.on('SIGTERM', () => {
-	notifyGate(-1, function(){
+	notifyGate(-1, null, function(){
 	    console.log('Process terminated');
 	    process.exit();
 	});
@@ -383,12 +385,12 @@ playerServer.on('connection', function (ws, req) {
 	console.log(`player ${playerId} (${req.connection.remoteAddress}) connected`);
 	players.set(playerId, { ws: ws, id: playerId });
 
-	function sendPlayersCount() {
+	function sendPlayersCount(url) {
 		let playerCountMsg = JSON.stringify({ type: 'playerCount', count: players.size });
 		for (let p of players.values()) {
 			p.ws.send(playerCountMsg);
 		}
-		notifyGate(players.size);
+		notifyGate(players.size,url);
 	}
 	
 	ws.on('message', function (msg) {
@@ -451,7 +453,7 @@ playerServer.on('connection', function (ws, req) {
 
 	ws.send(JSON.stringify(clientConfig));
 
-	sendPlayersCount();
+	sendPlayersCount(req.url);
 });
 
 function disconnectAllPlayers(code, reason) {
