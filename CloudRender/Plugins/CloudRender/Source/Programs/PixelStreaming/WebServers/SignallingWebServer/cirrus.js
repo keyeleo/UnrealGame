@@ -385,12 +385,12 @@ playerServer.on('connection', function (ws, req) {
 	console.log(`player ${playerId} (${req.connection.remoteAddress}) connected`);
 	players.set(playerId, { ws: ws, id: playerId });
 
-	function sendPlayersCount(url) {
+	function sendPlayersCount() {
 		let playerCountMsg = JSON.stringify({ type: 'playerCount', count: players.size });
 		for (let p of players.values()) {
 			p.ws.send(playerCountMsg);
 		}
-		notifyGate(players.size,url);
+		notifyGate(players.size,req.url);
 	}
 	
 	ws.on('message', function (msg) {
@@ -453,7 +453,7 @@ playerServer.on('connection', function (ws, req) {
 
 	ws.send(JSON.stringify(clientConfig));
 
-	sendPlayersCount(req.url);
+	sendPlayersCount();
 });
 
 function disconnectAllPlayers(code, reason) {
