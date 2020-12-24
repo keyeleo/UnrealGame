@@ -266,7 +266,7 @@ process.on('SIGTERM', () => {
 http.listen(httpPort, function () {
 	console.logColor(logging.Green, 'Http listening on *: ' + httpPort);
 	notifyGate(0);
-	setInterval(function(){notifyGate(players.size);}, 5*60*1000);	//5min
+	setInterval(function(){notifyGate(players.size);}, 1*60*1000);	//1 min
 });
 
 if (config.UseHTTPS) {
