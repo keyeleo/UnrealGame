@@ -1,4 +1,4 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "AudioCapturer.h"
 
@@ -114,14 +114,17 @@ int32 FAudioCapturer::Init()
 		return -1;
 	}
 
-	FAudioDevice* AudioDevice = GEngine->GetMainAudioDevice();
-	if (!AudioDevice)
+	FAudioDeviceHandle AudioDevice = GEngine->GetMainAudioDevice();
+	if (AudioDevice)
 	{
-		return -1;
+		AudioDevice->RegisterSubmixBufferListener(this);
+	}
+	else
+	{
+		UE_LOG(LogAudioCapturer, Warning, TEXT("No audio device"));
 	}
 
 	bInitialized = true;
-	AudioDevice->RegisterSubmixBufferListener(this);
 
 	UE_LOG(LogAudioCapturer, Verbose, TEXT("Init"));
 
@@ -139,13 +142,12 @@ int32 FAudioCapturer::Terminate()
 		return -1;
 	}
 
-	FAudioDevice* AudioDevice = GEngine->GetMainAudioDevice();
-	if (!AudioDevice)
+	FAudioDeviceHandle AudioDevice = GEngine->GetMainAudioDevice();
+	if (AudioDevice)
 	{
-		return -1;
+		AudioDevice->UnregisterSubmixBufferListener(this);
 	}
 
-	AudioDevice->UnregisterSubmixBufferListener(this);
 	bInitialized = false;
 
 	{

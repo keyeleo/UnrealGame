@@ -1,4 +1,4 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -61,9 +61,9 @@ public:
 		return SampleRate;
 	}
 
-	FTimespan GetTime() const override
+	FMediaTimeStamp GetTime() const override
 	{
-		return Timestamp;
+		return FMediaTimeStamp(Timestamp);
 	}
 
 private:

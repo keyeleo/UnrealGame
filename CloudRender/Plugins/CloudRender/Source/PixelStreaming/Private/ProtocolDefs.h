@@ -1,4 +1,4 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -60,7 +60,13 @@ namespace PixelStreamingProtocol
 	};
 
 	//! Messages that can be sent to the webrtc players
+	// must be kept in sync with app.js `ToClientMessageType`
 	enum class EToPlayerMsg : uint8 {
-		QualityControlOwnership, Response, Command, FreezeFrame, UnfreezeFrame
+		QualityControlOwnership, 
+		Response, 
+		Command, 
+		FreezeFrame, 
+		UnfreezeFrame,
+		VideoEncoderAvgQP // average Quantisation Parameter value of Video Encoder, roughly depicts video encoding quality
 	};
 };

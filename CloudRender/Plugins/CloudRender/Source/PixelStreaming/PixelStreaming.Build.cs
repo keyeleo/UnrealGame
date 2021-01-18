@@ -1,4 +1,4 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 using System.IO;
 using System.Collections.Generic;
@@ -108,7 +108,9 @@ namespace UnrealBuildTool.Rules
 				"WebSockets",
 				"Sockets",
                 "MediaUtils",
-            });
+				"AVEncoder",
+				"DeveloperSettings"
+			});
 
             DynamicallyLoadedModuleNames.AddRange(new string[]
            {
@@ -135,6 +137,7 @@ namespace UnrealBuildTool.Rules
             });
             // required by D3D11RHI
             AddEngineThirdPartyPrivateStaticDependencies(Target, "IntelMetricsDiscovery");
+			AddEngineThirdPartyPrivateStaticDependencies(Target, "IntelExtensionsFramework");
             AddEngineThirdPartyPrivateStaticDependencies(Target, "NVAftermath");
 
             {   // WebRTC stuff

@@ -1,4 +1,4 @@
-// Copyright 1998-2019 Epic Games, Inc. All Rights Reserved.
+// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -22,4 +22,6 @@ struct FHUDStats
 	FSmoothedValue<SmoothingPeriod> EncoderLatencyMs;
 	FSmoothedValue<SmoothingPeriod> EncoderBitrateMbps;
 	FSmoothedValue<SmoothingPeriod> EncoderQP;
+	FSmoothedValue<SmoothingPeriod> EncoderFPS;
+	double BandwidthMbps = 0;
 };
