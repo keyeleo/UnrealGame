@@ -43,7 +43,7 @@ if %NAT%==true (
 @pushd %~dp0
 
 :: start Game with PixelStreaming
-@start "Game" %Game%.exe -dx11 -RenderOffScreen -PixelStreamingPort=%gamePort% -NvEncFrameRateNum=%frameRate% -NvEncAverageBitRate=%averageBitRate% -Heartbeat=%ue4Heartbeat% -nosound
+@start "Game" %Game%.exe -dx11 -RenderOffScreen -PixelStreamingPort=%gamePort% -NvEncFrameRateNum=%frameRate% -NvEncAverageBitRate=%averageBitRate% -Heartbeat=%ue4Heartbeat% -nosound -AllowPixelStreamingCommands
 
 @popd
 cd ..
