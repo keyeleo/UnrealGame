@@ -57,6 +57,15 @@ function log(str) {
 	console.log(`${Math.floor(Date.now() - t0)}: ` + str);
 }
 
+function getQueryString(name) {
+    let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+    let r = window.location.search.substr(1).match(reg);
+    if (r != null) {
+        return decodeURIComponent(r[2]);
+    };
+    return null;
+ }
+
 function setupHtmlEvents() {
 	//Window events
 	window.addEventListener('resize', resizePlayerStyle, true);
@@ -400,6 +409,22 @@ function setupWebRtcPlayer(htmlElement, config) {
 	webRtcPlayerObj.onDataChannelConnected = function () {
 		if (ws && ws.readyState === WS_OPEN_STATE) {
 			showTextOverlay('WebRTC connected, waiting for video');
+		}
+		let resolution=getQueryString("resolution");
+		if(resolution){
+			let str=resolution.split("x");
+			if(str.length==2){
+				// let descriptor={ ConsoleCommand: ",Encoder.UseBackBufferSize 1,Encoder.TargetSize "+resolution };
+				let descriptor={ Resolution: { Width: Number(str[0]), Height: Number(str[1])}};
+				emitCommand(descriptor);
+			}
+		}
+
+		let fps=getQueryString("fps");
+		if(fps){
+			let bitrate=((Math.min(60, Math.max(10, Number(fps))) - 10) / 50 * 4 + 1) * 1000000;
+			let descriptor={ ConsoleCommand: "Encoder.PrioritiseQuality 1,Encoder.MaxBitrate "+ bitrate };
+			emitCommand(descriptor);
 		}
 	};
 

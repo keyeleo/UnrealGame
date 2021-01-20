@@ -661,7 +661,7 @@ void FPixelStreamingNvVideoEncoder::OnFrameDropped(FBufferId BufferId)
 
 	Frame.State = EFrameState::Free;
 
-	UE_LOG(LogVideoEncoder, Log, TEXT("Buffer #%d (%d) dropped"), BufferedFrames[BufferId].FrameIdx, BufferId);
+	UE_LOG(LogVideoEncoder, Verbose, TEXT("Buffer #%d (%d) dropped"), BufferedFrames[BufferId].FrameIdx, BufferId);
 }
 
 void FPixelStreamingNvVideoEncoder::SubscribeToFrameEncodedEvent(FVideoEncoder& Subscriber)
@@ -753,7 +753,7 @@ bool FPixelStreamingNvVideoEncoder::UpdateFramerate()
 		// Quality of video suffers if B/W is limited and drops below some threshold. We can sacrifice
 		// responsiveness (latency) to improve video quality. We reduce framerate and so encoder
 		// can spread limited bitrate over fewer frames.
-		float Mbps = NvEncConfig.rcParams.averageBitRate;
+		float Mbps = NvEncConfig.rcParams.averageBitRate / 1000000.0;;
 
 		// bitrate lower than lower bound results always in min FPS
 		// bitrate between lower and upper bounds results in FPS proportionally between min and max FPS
@@ -779,7 +779,7 @@ bool FPixelStreamingNvVideoEncoder::UpdateFramerate()
 		AsyncTask(ENamedThreads::GameThread, [Fps]() { GEngine->SetMaxFPS(Fps); });
 
 		NvEncInitializeParams.frameRateNum = static_cast<uint32>(Fps);
-		UE_LOG(LogVideoEncoder, Log, TEXT("NvEnc reconfigured to %d FPS"), NvEncInitializeParams.frameRateNum);
+		UE_LOG(LogVideoEncoder, Log, TEXT("NvEnc reconfigured to %d FPS, Encoder.MaxBitrate=%dM"), NvEncInitializeParams.frameRateNum, static_cast<uint32>(CVarEncoderMaxBitrate.GetValueOnAnyThread()) / 1000000);
 		return true;
 	}
 

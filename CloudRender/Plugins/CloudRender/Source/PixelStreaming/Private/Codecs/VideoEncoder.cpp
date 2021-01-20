@@ -183,7 +183,7 @@ int32 FVideoEncoder::SetRateAllocation(const webrtc::BitrateAllocation& Allocati
 
 	if (bControlsQuality)
 	{
-		UE_LOG(PixelStreamer, Log, TEXT("%s : PlayerId=%d, Bitrate=%u kbps, framerate=%u"), TEXT(__FUNCTION__), PlayerSession->GetPlayerId(), Allocation.get_sum_kbps(), Framerate);
+		UE_LOG(PixelStreamer, Verbose, TEXT("%s : PlayerId=%d, Bitrate=%u kbps, framerate=%u"), TEXT(__FUNCTION__), PlayerSession->GetPlayerId(), Allocation.get_sum_kbps(), Framerate);
 	}
 
 	return 0;
