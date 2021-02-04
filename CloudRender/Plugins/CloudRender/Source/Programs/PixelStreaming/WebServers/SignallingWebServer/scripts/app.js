@@ -423,7 +423,9 @@ function setupWebRtcPlayer(htmlElement, config) {
 		let fps=getQueryString("fps");
 		if(fps){
 			let bitrate=((Math.min(60, Math.max(10, Number(fps))) - 10) / 50 * 4 + 1) * 1000000;
-			let descriptor={ ConsoleCommand: "Encoder.PrioritiseQuality 1,Encoder.MaxBitrate "+ bitrate };
+			let descriptor={ ConsoleCommand: "Encoder.PrioritiseQuality 1" };
+			emitCommand(descriptor);
+			descriptor={ ConsoleCommand: "Encoder.MaxBitrate "+ bitrate };
 			emitCommand(descriptor);
 		}
 	};
