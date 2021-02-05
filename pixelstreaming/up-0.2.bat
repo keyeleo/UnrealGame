@@ -34,6 +34,6 @@ if %NAT%==true (
 @popd
 @pushd %~dp0
 
-start "Game" %Game%.exe -dx11 -RenderOffScreen -PixelStreamingIP=%publicIp% -PixelStreamingPort=%streamerPort% -NvEncFrameRateNum=%frameRate% -NvEncAverageBitRate=%averageBitRate% -Heartbeat=%ue4Heartbeat%
+start "Game" %Game%.exe -dx11 -RenderOffScreen -PixelStreamingIP=%publicIp% -PixelStreamingPort=%streamerPort% -NvEncFrameRateNum=%frameRate% -NvEncAverageBitRate=%averageBitRate% -Heartbeat=%ue4Heartbeat% -AllowPixelStreamingCommands
 
 @popd
