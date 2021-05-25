@@ -213,7 +213,8 @@ try {
 	console.error(`reading config.AdditionalRoutes: ${err}`)
 }
 
-app.get('/', isAuthenticated('/login'), function (req, res) {
+let	homePath = (typeof config.homePath != 'undefined' && config.homePath != '') ? config.homePath.toString() : '/';
+app.get(homePath, isAuthenticated('/login'), function (req, res) {
 	homepageFile = (typeof config.HomepageFile != 'undefined' && config.HomepageFile != '') ? config.HomepageFile.toString() : defaultConfig.HomepageFile;
 	homepageFilePath = path.join(__dirname, homepageFile)
 

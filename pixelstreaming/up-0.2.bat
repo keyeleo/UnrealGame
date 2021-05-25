@@ -3,6 +3,7 @@
 @echo off
 set Game=CloudRender
 set publicIp=172.18.137.168
+set iceIp=172.18.137.168
 set signallingPort=80
 set streamerPort=8888
 set stunPort=19302
@@ -24,7 +25,7 @@ pushd %~dp0
 
 if %NAT%==true (
 	:: run SignallingWebServer
-	start "%Game%SignallingWebServer" Powershell.exe -executionpolicy unrestricted -File Start_AWS_WithTURN_SignallingServer.ps1 -cirrus %cirrus% -publicIp %publicIp% --httpPort %signallingPort% --streamerPort %streamerPort% -stunPort %stunPort% -turnPort %turnPort% -heartbeat %cirrusHeartbeat% -HomepageFile custom_html/PixelDemo.htm
+	start "%Game%SignallingWebServer" Powershell.exe -executionpolicy unrestricted -File Start_AWS_WithTURN_SignallingServer.ps1 -cirrus %cirrus% -publicIp %publicIp% --httpPort %signallingPort% --streamerPort %streamerPort% -iceIp %iceIp% -stunPort %stunPort% -turnPort %turnPort% -heartbeat %cirrusHeartbeat% -HomepageFile custom_html/PixelDemo.htm
 ) else (
 	:: run SignallingWebServer
 	start "%Game%SignallingWebServer" node %cirrus% --publicIp %publicIp% --httpPort %signallingPort% --streamerPort %streamerPort% --heartbeat %cirrusHeartbeat% --HomepageFile=custom_html/PixelDemo.htm

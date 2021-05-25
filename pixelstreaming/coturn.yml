@@ -1,0 +1,17 @@
+# should not run with docker swarm !
+# relay ports needs at least 4
+version: '3.0'
+services:
+  coturn:
+    image: "coturn/coturn:4.5-alpine"
+    restart: always
+    ports:
+      - 39001:3478/udp
+    command:
+      turnserver -n -a -f --no-cli --log-file=stdout --user=vic:liu -r vic.liu --max-port=49252 -X 123.127.216.28
+  coturn1:
+    image: "coturn/coturn:4.5-alpine"
+    restart: always
+    network_mode: "host"
+    command:
+      turnserver -n -a -f --no-cli --log-file=stdout --user=vic:liu -r vic.liu -p 39001 --max-port=49252 -X 123.127.216.28

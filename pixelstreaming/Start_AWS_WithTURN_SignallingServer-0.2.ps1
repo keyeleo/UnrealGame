@@ -2,6 +2,7 @@
 
 param(
 [string]$publicIp=$(throw "Parameter missing: -publicIp PublicIp"),
+[string]$iceIp=$(throw "Parameter missing: -iceIp ICEIp"),
 [int]$httpPort=$(throw "Parameter missing: -httpPort HttpPort"),
 [int]$streamerPort=$(throw "Parameter missing: -streamerPort StreamerPort"),
 [int]$stunPort=$(throw "Parameter missing: -stunPort StunPort"),
@@ -12,9 +13,9 @@ param(
 )
 
 
-# $publicIp = Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/public-ipv4"
+# $iceIp = Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/public-ipv4"
 
-$peerConnectionOptions = "{ \""iceServers\"": [{\""urls\"": [\""stun:" + $publicIp + ":" + $stunPort + "\"",\""turn:" + $publicIp + ":" + $turnPort + "\""], \""username\"": \""PixelStreamingUser\"", \""credential\"": \""Another TURN in the road\""}] }"
+$peerConnectionOptions = "{ \""offerExtmapAllowMixed\"": false, \""iceServers\"": [{\""urls\"": [\""stun:" + $iceIp + ":" + $stunPort + "\"",\""turn:" + $iceIp + ":" + $turnPort + "\""], \""username\"": \""PixelStreamingUser\"", \""credential\"": \""Another TURN in the road\""}] }"
 
 $ProcessExe = "node.exe"
 $Arguments = @("$cirrus", "--peerConnectionOptions=""$peerConnectionOptions""", "--publicIp=$publicIp", "--httpPort=$httpPort", "--streamerPort=$streamerPort", "--heartbeat=$heartbeat", "--HomepageFile=$HomepageFile")
