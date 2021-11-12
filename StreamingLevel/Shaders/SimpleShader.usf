@@ -1,0 +1,26 @@
+#include "/Engine/Public/Platform.ush"
+//顶点着色器
+/*
+    输入二维点和颜色；
+    输出四维的点和颜色。
+*/
+void MainVS(
+    in float2 InPosition : ATTRIBUTE0,
+    in float4 InColor : ATTRIBUTE1,
+    out float4 OutPosition : SV_POSITION,
+    out float4 OutColor : COLOR0
+    )
+{
+    OutPosition = float4(InPosition, 0, 1);
+    OutColor = InColor;
+}
+//像素着色器
+//输入顶点和颜色
+//输出颜色
+void MainPS(
+    in float4 InPosition : SV_POSITION,
+    in float4 InColor : COLOR0,
+    out float4 OutColor : SV_Target0)
+{
+    OutColor = InColor;
+}
