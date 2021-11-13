@@ -7,7 +7,6 @@ public class UnrealPlusEditorTarget : TargetRules
 {
 	public UnrealPlusEditorTarget(TargetInfo Target) : base(Target)
 	{
-        bDisableDebugInfo = true;
 		Type = TargetType.Editor;
 		ExtraModuleNames.Add("UnrealPlus");
 	}

@@ -7,7 +7,6 @@ public class UnrealPlusTarget : TargetRules
 {
 	public UnrealPlusTarget(TargetInfo Target) : base(Target)
 	{
-        bDisableDebugInfo = true;
 		Type = TargetType.Game;
 		ExtraModuleNames.Add("UnrealPlus");
 	}
