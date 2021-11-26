@@ -1,0 +1,14 @@
+Saved
+Content
+DerivedDataCache
+UnrealPlus.xcworkspace
+.vscode
+Intermediate
+Plugins/PluginContent/Content
+Plugins/slua_unreal/cmake
+Plugins/slua_unreal/Library
+Plugins/slua_unreal/External
+Plugins/slua_unreal/Intermediate
+Plugins/Iot/Intermediate
+Plugins/FFMPEGMedia/Intermediate
+Plugins/FFMPEGMedia/ThirdParty
