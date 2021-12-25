@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"name": "Online",
+			"path": "."
+		},
+		{
+			"name": "UE4",
+			"path": "/Users/vic/Documents/project/Epic"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off"
+	},
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",
+			"ms-dotnettools.csharp",
+			"vadimcn.vscode-lldb",
+			"ms-vscode.mono-debug"
+		]
+	}
+}
